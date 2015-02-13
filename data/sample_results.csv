@@ -1,0 +1,53 @@
+"HITId","HITTypeId","Title","Description","Keywords","Reward","CreationTime","MaxAssignments","RequesterAnnotation","AssignmentDurationInSeconds","AutoApprovalDelayInSeconds","Expiration","NumberOfSimilarHITs","LifetimeInSeconds","AssignmentId","WorkerId","AssignmentStatus","AcceptTime","SubmitTime","AutoApprovalTime","ApprovalTime","RejectionTime","RequesterFeedback","WorkTimeInSeconds","LifetimeApprovalRate","Last30DaysApprovalRate","Last7DaysApprovalRate","Input.image_url","Answer.HoursOfOperation","Answer.Rates","Approve","Reject"
+"3UUSLRKAUL3MYMGDXDK7Y6MWXWVD7M","3WO7ZNC6SK6AOSTF1BHUWLBHAZY8DA","Transcribe parking lot information","You will be shown an image of a parking lot rate card. We will ask you to transcribe the rates and hours of operation.","image, write, transcription, parking, lots","$0.25","Wed Feb 11 22:31:09 GMT 2015","3","BatchId:1819000;","900","28800","Thu Feb 19 00:52:29 GMT 2015","","","35USIKEBNRGF3IRFT0YKCGUH85T6NI","A2PTZVAIGEY9ZJ","Rejected","Thu Feb 12 00:17:12 GMT 2015","Thu Feb 12 00:21:55 GMT 2015","Thu Feb 12 00:21:55 PST 2015","","Wed Feb 11 16:52:28 PST 2015","Didn't follow the formatting outlined in the example and as dictated in the instructions at the top.","283","50% (1/2)","50% (1/2)","50% (1/2)","http://s3-w2.parkme.com.s3-us-west-2.amazonaws.com/lot_img/52599/deca35711d584fe9ba208562b754b279.jpg","Summer hours: 
+Mon- Thurs 7AM-Midnight
+Friday 7AM-3AM
+Saturday 9AM - 3AM
+Sunday 10AM- Midnight
+Winter Hours
+Mon-Thur 7AM - 9PM
+Friday 7AM-3AM
+Saturday 10AM-3AM
+Sunday Noon-10PM","0-1 HOUR $11.00
+MAX DAILY $19.00
+EVENINGS (AFTER 5PM AND WEEKENDS) $11.00"
+"3UUSLRKAUL3MYMGDXDK7Y6MWXWVD7M","3WO7ZNC6SK6AOSTF1BHUWLBHAZY8DA","Transcribe parking lot information","You will be shown an image of a parking lot rate card. We will ask you to transcribe the rates and hours of operation.","image, write, transcription, parking, lots","$0.25","Wed Feb 11 22:31:09 GMT 2015","3","BatchId:1819000;","900","28800","Thu Feb 19 00:52:29 GMT 2015","","","3CP1TO84PT1NVS282YQVSMDJ1FY52H","A9OYZM3N9E825","Approved","Thu Feb 12 01:21:17 GMT 2015","Thu Feb 12 01:30:28 GMT 2015","Thu Feb 12 01:30:28 PST 2015","Wed Feb 11 17:49:32 PST 2015","","","551","100% (1/1)","100% (1/1)","100% (1/1)","http://s3-w2.parkme.com.s3-us-west-2.amazonaws.com/lot_img/52599/deca35711d584fe9ba208562b754b279.jpg","Summer 
+Mon-Thurs::7 AM- midnight
+Friday:: 7:00AM - 3:00AM
+SAT:: 9:00AM-3:00AM
+SUN:: 10:00AM-MIDNIGHT
+WINTERHOURS
+MON-THURS:: 7:00AM- 9:00PM
+FRI :: 7:00AM- 3:00AM
+SAT:: 10:00AM- 3:00AM
+SUN NOON- 10:00 PM","0-1 Hour:: $9.32
+Max Daily:: $16.10
+Evenings, afternoons and weekends:: $9.32"
+"3UUSLRKAUL3MYMGDXDK7Y6MWXWVD7M","3WO7ZNC6SK6AOSTF1BHUWLBHAZY8DA","Transcribe parking lot information","You will be shown an image of a parking lot rate card. We will ask you to transcribe the rates and hours of operation.","image, write, transcription, parking, lots","$0.25","Wed Feb 11 22:31:09 GMT 2015","3","BatchId:1819000;","900","28800","Thu Feb 19 00:52:29 GMT 2015","","","3OHYZ19UGC5Y853UKSF97AW8UYSAOV","A138ZQHYN36BY8","Approved","Thu Feb 12 00:52:43 GMT 2015","Thu Feb 12 01:02:56 GMT 2015","Thu Feb 12 01:02:56 PST 2015","Wed Feb 11 17:07:26 PST 2015","","","613","100% (1/1)","100% (1/1)","100% (1/1)","http://s3-w2.parkme.com.s3-us-west-2.amazonaws.com/lot_img/52599/deca35711d584fe9ba208562b754b279.jpg","Summer hours of operation:
+Mon-Thurs :: 7:00 AM - Midnight
+Friday :: 7:00 AM - 3:00 AM
+Saturday :: 9:00 AM - 3:00 AM
+Sunday :: 10:00 AM - Midnight
+Winter hours of operation:
+Mon-Thurs :: 7:00 AM - 9:00 PM
+Friday :: 7:00 AM - 3:00 AM
+Saturday :: 10:00 AM - 3:00 AM
+Sunday :: Noon - 10:00 PM","0 - 1 Hour :: $11.00
+Max Daily :: $19.00
+Evenings :: $11.00
+(After 5:00 PM and Weekends)"
+"3WYZV0QBFJDNY4OK1UXZXFBKW4XXBT","3WO7ZNC6SK6AOSTF1BHUWLBHAZY8DA","Transcribe parking lot information","You will be shown an image of a parking lot rate card. We will ask you to transcribe the rates and hours of operation.","image, write, transcription, parking, lots","$0.25","Wed Feb 11 22:31:09 GMT 2015","3","BatchId:1819000;","900","28800","Wed Feb 18 22:31:09 GMT 2015","","","33LKR6A5KEKIR9V2KQ8FQJ9SPCW1TD","A2P0UKN1U3LHMO","Rejected","Wed Feb 11 22:42:47 GMT 2015","Wed Feb 11 22:45:45 GMT 2015","Wed Feb 11 22:45:45 PST 2015","","Wed Feb 11 15:01:54 PST 2015","Did not correct follow the format as per the instructions and the example.","178","0% (0/1)","0% (0/1)","0% (0/1)","http://s3-w2.parkme.com/lot_img/22507/0c9836ee46314c7c96320830fd0759e6.jpg","Mon-Thu 9:00am-10:-00pm
+Fri 9:00am-12:00am
+Sat 10:00am-12:00am
+Sun 10am-10pm","$2.00 each 15 minutes 
+$14.00 Maximum"
+"3WYZV0QBFJDNY4OK1UXZXFBKW4XXBT","3WO7ZNC6SK6AOSTF1BHUWLBHAZY8DA","Transcribe parking lot information","You will be shown an image of a parking lot rate card. We will ask you to transcribe the rates and hours of operation.","image, write, transcription, parking, lots","$0.25","Wed Feb 11 22:31:09 GMT 2015","3","BatchId:1819000;","900","28800","Wed Feb 18 22:31:09 GMT 2015","","","35BLDD71I6XUZXKZXWHMJVHPZCSVZF","A2PTZVAIGEY9ZJ","Approved","Thu Feb 12 00:22:06 GMT 2015","Thu Feb 12 00:26:59 GMT 2015","Thu Feb 12 00:26:59 PST 2015","Wed Feb 11 16:31:33 PST 2015","","","293","50% (1/2)","50% (1/2)","50% (1/2)","http://s3-w2.parkme.com/lot_img/22507/0c9836ee46314c7c96320830fd0759e6.jpg","Mon-Thu :: 9:00 am - 10 pm 
+Fri :: 9:00 am - 12 am
+Sat :: 10:00 am - 12:00 am
+Sun :: 10:00 am - 10:00 pm","Each 15 Minutes :: $2.00
+Maximum ::  $14.00"
+"3WYZV0QBFJDNY4OK1UXZXFBKW4XXBT","3WO7ZNC6SK6AOSTF1BHUWLBHAZY8DA","Transcribe parking lot information","You will be shown an image of a parking lot rate card. We will ask you to transcribe the rates and hours of operation.","image, write, transcription, parking, lots","$0.25","Wed Feb 11 22:31:09 GMT 2015","3","BatchId:1819000;","900","28800","Wed Feb 18 22:31:09 GMT 2015","","","3KV0LJBBH2L27J4Z9NMIAWWDZ2TRMX","A1RD8SX3SF0M6Y","Approved","Wed Feb 11 22:46:56 GMT 2015","Wed Feb 11 22:49:05 GMT 2015","Wed Feb 11 22:49:05 PST 2015","Wed Feb 11 16:31:33 PST 2015","","","129","100% (1/1)","100% (1/1)","100% (1/1)","http://s3-w2.parkme.com/lot_img/22507/0c9836ee46314c7c96320830fd0759e6.jpg","Mon-Thu 9:00 AM - 10:00 PM
+Fri 9:00 AM - 12:00 AM
+Sat 10:00 AM - 12:00 AM
+Sun 10:00 AM - 10:00 PM","Each 15 Minutes :: $2.00
+Maximum :: $14.00"
