@@ -8,15 +8,19 @@
 """
 import pyparsing
 
+
 def debug_parts(t):
     print t
     return t
 
+
 def final_join(t):
     return ' '.join(t) + ':'
 
+
 def conjoin_parts(t):
     return "(In {} {})".format(t[1].capitalize(), t[2])
+
 
 # Numbers
 lone_number = pyparsing.Word(pyparsing.nums)
@@ -24,6 +28,7 @@ number_range_form = pyparsing.Combine(
     lone_number + "-" + lone_number,
     adjacent=False)
 price_number_form = pyparsing.Regex(r'[0-9]+\.[0-9]{2,}')
+
 
 # Times / Dates
 hour = pyparsing.Regex(r'(H|h)(ou)?r').setParseAction(
@@ -34,6 +39,7 @@ minute = pyparsing.Regex(r'(M|m)in(ute)?').setParseAction(
     pyparsing.replaceWith('Min'))
 minutes = pyparsing.Regex(r'(M|m)in(ute)?s').setParseAction(
     pyparsing.replaceWith('Mins'))
+
 
 hour_forms = pyparsing.Or([hour, hours])
 minute_forms = pyparsing.Or([minute, minutes])
@@ -46,8 +52,10 @@ duration_form = pyparsing.Or([
     pyparsing.Regex(r'(N|n)oon').setParseAction(pyparsing.replaceWith("12PM")),
     pyparsing.Regex(r'Midnight').setParseAction(pyparsing.replaceWith("12AM"))])
 
+
 evenings = pyparsing.Regex(r'(E|e)vening(s)?')
 nights = pyparsing.Regex(r'(N|n)ight(s)?')
+
 
 monday_forms = pyparsing.Regex(r'(M|m)on(day)?').setParseAction(
     pyparsing.replaceWith('Mon'))
@@ -97,9 +105,11 @@ maximum_forms = (
     pyparsing.Regex(r'(M|m)ax(imum)?') +
     pyparsing.Optional(daily_forms))
 
+
 # Currencies
 currency_form = pyparsing.Or([pyparsing.Word('$')])
 price_form = pyparsing.Combine(currency_form + price_number_form)
+
 
 # Rate Types
 hourly_rate = (
@@ -122,6 +132,7 @@ weekend = (
         pyparsing.replaceWith('Sat-Sun'))
     + pyparsing.Optional(parenthetical_form))
 
+
 # Rate Cards
 rate_types = [
     hourly_rate, evening_forms, flat_rate,
@@ -130,5 +141,5 @@ rate_types = [
 ]
 rate_card = (
     pyparsing.Or(rate_types).setParseAction(final_join) + 
-    pyparsing.Word("::").suppress() + 
+    pyparsing.Optional(pyparsing.Word("::")).suppress() + 
     price_form)
