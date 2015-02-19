@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# pylint: disable=C0103
 """
     parkme.ratecard.grammar
     ~~~~~~~~~~~~~~~~~~~~~~~
@@ -10,19 +12,23 @@ import pyparsing
 
 
 def debug_parts(t):
+    """Useful for debugging"""
     print t
     return t
 
 
 def final_join(t):
+    """Final joining together of all parsed components"""
     return ' '.join(t) + ':'
 
 
 def conjoin_parts(t):
+    """Conjoin parts of an In (After|Before) Rate"""
     return "(In {} {})".format(t[1].capitalize(), t[2])
 
 
 def decimalize_price(t):
+    """Return a price with two numbers after the decimal point."""
     return "{0:.2f}".format(float(t[0]))
 
 
@@ -55,7 +61,8 @@ timestamp_form = pyparsing.Combine(
 duration_form = pyparsing.Or([
     timestamp_form,
     pyparsing.Regex(r'(N|n)oon').setParseAction(pyparsing.replaceWith("12PM")),
-    pyparsing.Regex(r'Midnight').setParseAction(pyparsing.replaceWith("12AM"))])
+    pyparsing.Regex(r'Midnight').setParseAction(pyparsing.replaceWith("12AM"))
+])
 
 
 evenings = pyparsing.Regex(r'(E|e)vening(s)?')
@@ -149,6 +156,6 @@ rate_types = [
     weekend, day_range_after_before_form
 ]
 rate_card = (
-    pyparsing.Or(rate_types).setParseAction(final_join) + 
-    pyparsing.Optional(pyparsing.Word("::")).suppress() + 
+    pyparsing.Or(rate_types).setParseAction(final_join) +
+    pyparsing.Optional(pyparsing.Word("::")).suppress() +
     price_form)

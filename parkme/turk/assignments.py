@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+# pylint: disable=W0142
 """
     parkme.turk.assignments
     ~~~~~~~~~~~~~~~~~~~~~~~

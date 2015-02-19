@@ -29,7 +29,7 @@ def has_pending_assignments(hit):
     :type hit: mturk.connection.HIT
     :rtype: bool
     """
-    return int(each.NumberOfAssignmentsPending) > 0
+    return int(hit.NumberOfAssignmentsPending) > 0
 
 
 def filter_by_batch_id(hits, batch_id):
