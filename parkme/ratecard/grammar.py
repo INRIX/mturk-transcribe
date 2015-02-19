@@ -22,12 +22,17 @@ def conjoin_parts(t):
     return "(In {} {})".format(t[1].capitalize(), t[2])
 
 
+def decimalize_price(t):
+    return "{0:.2f}".format(float(t[0]))
+
+
 # Numbers
 lone_number = pyparsing.Word(pyparsing.nums)
 number_range_form = pyparsing.Combine(
     lone_number + "-" + lone_number,
     adjacent=False)
-price_number_form = pyparsing.Regex(r'[0-9]+\.[0-9]{2,}')
+price_number_form = pyparsing.Regex(
+    r'[0-9]+(\.[0-9]{2})?').setParseAction(decimalize_price)
 
 
 # Times / Dates
@@ -121,9 +126,13 @@ evening_forms = (
     + pyparsing.Optional(parenthetical_form))
 daily_max_forms = pyparsing.Or([day_forms, maximum_forms]).setParseAction(
     pyparsing.replaceWith('Daily Max'))
-flat_rate = pyparsing.Regex(r'(F|f)lat\s+(R|r)ate')
+flat_rate = pyparsing.Regex(r'(F|f)lat\s+(R|r)ate').setParseAction(
+    pyparsing.replaceWith('Flat Rate'))
 each_n = pyparsing.Combine(
-    pyparsing.Regex(r'(E|e)ach') + pyparsing.Word(pyparsing.nums) + time_forms,
+    pyparsing.Regex(r'(E|e)ach').setParseAction(
+        pyparsing.replaceWith('Each')) +
+    pyparsing.Word(pyparsing.nums) +
+    time_forms,
     joinString=' ',
     adjacent=False)
 early_bird = pyparsing.Regex(r'(E|e)arly\s+(B|b)ird')

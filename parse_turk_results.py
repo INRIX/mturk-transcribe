@@ -35,18 +35,6 @@ day_range_examples = [
     'Monday-Thursday'
 ]
 
-def parse_or_reject_line(line):
-    """Parse the given line, indicate a rejection if parsing fails.
-
-    :param line: A single text line
-    :type line: str or unicode
-    :rtype: str or unicode or False
-    """
-    try:
-        return parser.convert_to_parkme_format(line)
-    except parser.RateCardParsingException:
-        return False
-
 
 def turk_answers_from_file(file_path):
     """Generator that yields successive lines from a turk answer file.
@@ -55,10 +43,8 @@ def turk_answers_from_file(file_path):
     :type file_path: str or unicode
     """
     with open(file_path, 'rb') as csvfile:
-        csvreader = csv.reader(csvfile)
-        headers = csvreader.next()
-        for row in csvreader:
-            yield dict(zip(headers, row))
+        csvreader = csv.DictReader(csvfile)
+        return list(csvreader)
 
 
 def parse_or_reject_answers(answers):
@@ -73,7 +59,7 @@ def parse_or_reject_answers(answers):
     lines = answers.split('\r\n')
     results = []
     for each in lines:
-        results.append((each, parse_or_reject_line(each)))
+        results.append((each, parser.parse_or_reject_line(each)))
     rejected = any([v is False for k, v in results])
     return results, rejected
 
@@ -101,13 +87,34 @@ def print_rate_results(hit_id, worker_id, rates):
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print "Usage: ./parse_turk_results.py [CSVFILE]"
-        print "Prints the result of parsing each sample in the CSV file"
+    if len(sys.argv) < 3:
+        print "Usage: ./parse_turk_results.py [CSVFILE] [OUTPUT]"
+        print "Prints the result of parsing each sample in the CSV file, write"
+        print "results to OUTPUT file."
         exit(1)
 
-    for answer in turk_answers_from_file(sys.argv[1]):
+    csv_file = sys.argv[1]
+    output_file = sys.argv[2]
+
+    output_rows = []
+    for answer in turk_answers_from_file(csv_file):
+        results, rejected = parse_or_reject_answers(answer['Answer.Rates'])
         print_rate_results(
             answer['HITId'],
             answer['WorkerId'],
-            answer['Answer.Rates'])
+            answer['Answer.Rates'].lower())
+
+        if rejected:
+            answer['Reject'] = 'x'
+            answer['RequesterFeedback'] = 'Automated parsing of answer failed.'
+        else:
+            answer['Approve'] = 'x'
+            
+        output_rows.append(answer)
+
+    if output_rows:
+        with open(output_file, 'wb') as csvfile:
+            headers = output_rows[0].keys()
+            writer = csv.DictWriter(csvfile, fieldnames=headers, quoting=csv.QUOTE_ALL)
+            writer.writeheader()
+            writer.writerows(output_rows)

@@ -40,3 +40,16 @@ def convert_to_parkme_format(line):
     :rtype: str
     """
     return ' '.join(parse_rate_card_line(line))
+
+
+def parse_or_reject_line(line):
+    """Parse the given line, indicate a rejection if parsing fails.
+
+    :param line: A single text line
+    :type line: str or unicode
+    :rtype: str or unicode or False
+    """
+    try:
+        return convert_to_parkme_format(line)
+    except RateCardParsingException:
+        return False
