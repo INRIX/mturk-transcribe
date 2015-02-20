@@ -57,6 +57,8 @@ def parse_or_reject_answers(answers):
     :rtype: (list of input and parsed output, bool)
     """
     lines = answers.split('\r\n')
+    # Remove any empty lines
+    lines = filter(None, [each.strip() for each in lines])
     results = []
     for each in lines:
         results.append((each, parser.parse_or_reject_line(each)))
