@@ -11,6 +11,9 @@
 import pyparsing
 
 
+user_visible_notes = []
+
+
 def debug_parts(t):
     """Useful for debugging"""
     print t
@@ -32,11 +35,23 @@ def decimalize_price(t):
     return "{0:.2f}".format(float(t[0]))
 
 
+def push_user_visible_note(val, loc, toks):
+    user_visible_notes.append(val)
+
+
+def add_close_bracket_if_not_available(t):
+    """Add a closing bracket if one is not available"""
+    result = t[0].upper()
+    return result if result[-1] == ')' else result + ')'
+
+
 # Numbers
 lone_number = pyparsing.Word(pyparsing.nums)
 number_range_form = pyparsing.Combine(
     lone_number + "-" + lone_number,
     adjacent=False)
+first_n_form = pyparsing.Or(["1st", "first"]).setParseAction(
+    pyparsing.replaceWith("0-1"))
 price_number_form = pyparsing.Regex(
     r'[0-9]+(\.[0-9]{2})?').setParseAction(decimalize_price)
 
@@ -49,14 +64,13 @@ hours = pyparsing.Regex(r'(H|h)(ou)?rs').setParseAction(
 minute = pyparsing.Regex(r'(M|m)in(ute)?').setParseAction(
     pyparsing.replaceWith('Min'))
 minutes = pyparsing.Regex(r'(M|m)in(ute)?s').setParseAction(
-    pyparsing.replaceWith('Mins'))
-
+    pyparsing.replaceWith('Min'))
 
 hour_forms = pyparsing.Or([hour, hours])
 minute_forms = pyparsing.Or([minute, minutes])
 time_forms = pyparsing.Or([hour_forms, minute_forms])
 timestamp_form = pyparsing.Combine(
-    pyparsing.Or(lone_number, lone_number + ":" + lone_number)
+    pyparsing.Or([lone_number, lone_number + ":" + lone_number])
     + pyparsing.Regex('(A|a|P|p)(M|m)'))
 duration_form = pyparsing.Or([
     timestamp_form,
@@ -88,13 +102,19 @@ day_names = [
     thursday_forms, friday_forms, saturday_forms, sunday_forms
 ]
 day_name_form = pyparsing.Or(day_names)
-day_range_form = day_name_form + "-" + day_name_form
+day_range_form = (
+    day_name_form +
+    pyparsing.Or([
+        pyparsing.Word("-"),
+        pyparsing.Word("through").setParseAction(pyparsing.replaceWith("-")),
+        pyparsing.Word("&").setParseAction(pyparsing.replaceWith("-"))
+    ]) + day_name_form)
 day_name_or_range_form = pyparsing.Combine(
     pyparsing.Or([day_name_form, day_range_form]),
     adjacent=False
 )
 in_after_before_form = (
-    pyparsing.Regex(r'\(\s*((I|i)n)?') +
+    pyparsing.Regex(r'\(?\s*((I|i)n)?') +
     pyparsing.Regex(r'((A|a)fter|(B|b)efore)') +
     duration_form +
     ")").setParseAction(conjoin_parts)
@@ -110,7 +130,7 @@ day_range_after_before_form = (
 
 
 # Daily Maximum
-day_forms = pyparsing.Regex(r'(D|d)ay(s)?')
+day_forms = pyparsing.Regex(r'((A|a)ll)?\s*(D|d)ay(s)?')
 daily_forms = pyparsing.Regex(r'(D|d)aily')
 maximum_forms = (
     pyparsing.Optional(daily_forms) +
@@ -124,8 +144,10 @@ price_form = pyparsing.Combine(currency_form + price_number_form)
 
 
 # Rate Types
+monthly = pyparsing.Regex(r'(M|m)onthly\s*(rate)?').setParseAction(
+    pyparsing.replaceWith('Monthly'))
 hourly_rate = (
-    pyparsing.Or([lone_number, number_range_form]) +
+    pyparsing.Or([lone_number, first_n_form, number_range_form]) +
     pyparsing.Or([hour, hours]))
 evening_forms = (
     pyparsing.Or([evenings, nights]).setParseAction(
@@ -133,29 +155,47 @@ evening_forms = (
     + pyparsing.Optional(parenthetical_form))
 daily_max_forms = pyparsing.Or([day_forms, maximum_forms]).setParseAction(
     pyparsing.replaceWith('Daily Max'))
-flat_rate = pyparsing.Regex(r'(F|f)lat\s+(R|r)ate').setParseAction(
-    pyparsing.replaceWith('Flat Rate'))
+flat_rate = (
+    pyparsing.Regex(r'(F|f)lat\s+(R|r)ate').setParseAction(
+        pyparsing.replaceWith('Flat Rate')) +
+    pyparsing.Optional(
+        pyparsing.Or([
+            pyparsing.Word("after").setParseAction(
+                pyparsing.replaceWith("(In After")),
+            pyparsing.Word("before").setParseAction(
+                pyparsing.replaceWith("(In Before"))]) +
+        duration_form.setParseAction(add_close_bracket_if_not_available)))
 each_n = pyparsing.Combine(
     pyparsing.Regex(r'(E|e)ach').setParseAction(
         pyparsing.replaceWith('Each')) +
-    pyparsing.Word(pyparsing.nums) +
-    time_forms,
+    pyparsing.Optional(pyparsing.Regex(r'(A|a)dditional')).setParseAction(
+        pyparsing.replaceWith("Add'l")) +
+    pyparsing.Or([
+        pyparsing.Word(pyparsing.nums) + time_forms,
+        pyparsing.Word("1/2 hour").setParseAction(pyparsing.replaceWith('30 Min'))]),
     joinString=' ',
     adjacent=False)
 early_bird = pyparsing.Regex(r'(E|e)arly\s+(B|b)ird')
 weekend = (
-    pyparsing.Regex(r'(W|w)eekend(s)?').setParseAction(
+    pyparsing.Regex(r'(W|w)eekend(s)?\s*(rate)?').setParseAction(
         pyparsing.replaceWith('Sat-Sun'))
     + pyparsing.Optional(parenthetical_form))
+notes = pyparsing.Or([
+    pyparsing.Word("no overnight parking"),
+    pyparsing.Regex(r'lost ticket(s)? pays.*'),
+    pyparsing.Regex(r'.*free.*'),
+    pyparsing.Regex(r'.*taxes.*')
+]).setParseAction(push_user_visible_note).suppress()
 
 
 # Rate Cards
 rate_types = [
-    hourly_rate, evening_forms, flat_rate,
+    monthly, hourly_rate, evening_forms, flat_rate,
     each_n, daily_max_forms, early_bird,
     weekend, day_range_after_before_form
 ]
-rate_card = (
+rate_card_form = (
     pyparsing.Or(rate_types).setParseAction(final_join) +
-    pyparsing.Optional(pyparsing.Word("::")).suppress() +
+    pyparsing.Optional(pyparsing.Or([pyparsing.Word("::"), pyparsing.Word("-")])).suppress() +
     price_form)
+rate_card = pyparsing.Or([rate_card_form, notes])

@@ -17,6 +17,19 @@ class RateCardParsingException(exceptions.Error):
     pass
 
 
+def clear_user_visible_notes():
+    """Clear the user visible notes"""
+    grammar.user_visible_notes = []
+
+
+def get_user_visible_notes():
+    """Return the user visible notes.
+
+    :rtype: list
+    """
+    return grammar.user_visible_notes
+
+
 def parse_rate_card_line(line):
     """Parse a single rate card line and return the ParkMe format.
 

@@ -103,6 +103,7 @@ if __name__ == '__main__':
     rejected_hits = collections.defaultdict(list)
     accepted_hits = collections.defaultdict(list)
     assignment_to_rates = {}
+    assignment_to_notes = {}
 
     conn = connection.MTurkConnection(
        aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -113,18 +114,23 @@ if __name__ == '__main__':
 
     for each in all_assignments:
        rates = assignments.get_answer_to_question(each, 'Rates').fields[0].lower()
-       results, rejected = parse_turk_results.parse_or_reject_answers(rates)
+       results, notes, rejected = parse_turk_results.parse_or_reject_answers(
+           rates)
 
        if rejected:
            rejected_hits[each.HITId].append(each.AssignmentId)
        else:
-           assignment_to_rates[each.AssignmentId] = '\r\n'.join([t[1] for t in results])
+           assignment_to_rates[each.AssignmentId] = '\r\n'.join([
+               t[1] for t in results if t[1].strip()])
+           assignment_to_notes[each.AssignmentId] = '\r\n'.join([
+               t for t in notes])
            accepted_hits[each.HITId].append(each.AssignmentId)
 
        parse_turk_results.print_rate_results(each.HITId, each.WorkerId, rates)
 
     for hit_id, assignment_ids in rejected_hits.iteritems():
-        reject_assignments_with_ids(conn, assignment_ids)
+        #reject_assignments_with_ids(conn, assignment_ids)
+        pass
 
     for hit_id, assignment_ids in accepted_hits.iteritems():
         if len(assignment_ids) >= 2:
@@ -134,7 +140,8 @@ if __name__ == '__main__':
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
             print termcolor.colored('AssignmentId: {}'.format(assignment_ids[0]), attrs=['bold'])
             rates = assignment_to_rates[assignment_ids[0]]
+            notes = assignment_to_notes[assignment_ids[0]]
             new_rate = models.TranscribedRate(
-                hit_id=hit_id, batch_id=batch_id, rates=rates)
+                hit_id=hit_id, batch_id=batch_id, rates=rates, user_notes=notes)
             transcribed_rate_gateway.save(new_rate)
             print rates
