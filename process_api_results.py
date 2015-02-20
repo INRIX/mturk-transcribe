@@ -68,6 +68,26 @@ def accept_assignments_with_ids(mturk_conn, assignment_ids):
                 raise mtre
 
 
+def reject_assignments_with_ids(mturk_conn, assignment_ids):
+    """Rejects all of the assignments with the given ids.
+
+    :param mturk_conn: A mechanical turk connection
+    :type mturk_conn: mturk.connection.Connection
+    :param assignment_ids: A list of assignment ids
+    :type assignment_ids: list of str or unicode
+    """
+    for aid in assignment_ids:
+        print termcolor.colored('REJECTED {}'.format(aid), 'red')
+        try:
+            mturk_conn.reject_assignment(
+                aid, feedback='Rejected by automatic transcription parser.')
+        except connection.MTurkRequestError as mtre:
+            # Assignment already rejected
+            if mtre.status != 200:
+                raise mtre
+
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "Usage: api_test.py [BATCH_ID]"
@@ -102,6 +122,9 @@ if __name__ == '__main__':
            accepted_hits[each.HITId].append(each.AssignmentId)
 
        parse_turk_results.print_rate_results(each.HITId, each.WorkerId, rates)
+
+    for hit_id, assignment_ids in rejected_hits.iteritems():
+        reject_assignments_with_ids(conn, assignment_ids)
 
     for hit_id, assignment_ids in accepted_hits.iteritems():
         if len(assignment_ids) >= 2:
