@@ -3,8 +3,10 @@ import sqlite3
 import sys
 
 from boto.mturk import connection
+import termcolor
 
 import parse_turk_results
+from parkme import models
 from parkme.ratecard import parser
 from parkme.turk import assignments
 from parkme.turk import hits
@@ -13,12 +15,6 @@ from parkme.turk import hits
 # AWS Credentials
 AWS_ACCESS_KEY_ID = 'AKIAJFLF5ZQRGKEN3WCQ'
 AWS_SECRET_ACCESS_KEY = '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'
-
-
-SIMILAR_ANSWERS = [
-    ['Each 15 Minutes :: $2.00', 'Maximum :: $14'],
-    ['Daily Max :: $14', 'Each 15 Mins :: $2']
-]
 
 
 def parse_all_results(answers):
@@ -47,39 +43,29 @@ def parser_results_are_equal(results_a, results_b):
     return True
 
 
-def create_sqlite_connection(dbfile):
-    """Create and return a new SQLite3 connection.
-
-    :param dbfile: The database file
-    :type dbfile: str or unicode
-    :rtype: sqlite3.Connection
-    """
-    dbconn = sqlite3.connect(dbfile)
-
-    cursor = dbconn.cursor()
-    cursor.execute('''
-    CREATE TABLE IF NOT EXISTS rates
-    (hit_id TEXT PRIMARY KEY, result TEXT)
-    ''')
-    cursor.execute('''
-    CREATE INDEX IF NOT EXISTS rates_hit_id_idx ON rates (hit_id);
-    ''')
-    dbconn.commit()
-
-    return dbconn
-
-
-def write_rates(sqlite_conn, hit_id, rates):
-    cursor = sqlite_conn.cursor()
-    cursor.execute(
-        "INSERT OR REPLACE INTO rates VALUES (?, ?)", (hit_id, rates))
-    sqlite_conn.commit()
-
-
 # Criteria for acceptance
 # 1. The result parsed correctly
 # 2. At least 1 other turk result also parsed correctly
 # Then all correctly parsed results will be accepted.
+
+
+def accept_assignments_with_ids(mturk_conn, assignment_ids):
+    """Accepts all of the assignments with the given ids.
+
+    :param mturk_connection: A mechanical turk connection
+    :type mturk_connection: mturk.connection.Connection
+    :param assignment_ids: A list of assignment ids
+    :type assignment_ids: list of str or unicode
+    """
+    for aid in assignment_ids:
+        print 'Approved {}'.format(aid)
+        try:
+            mturk_conn.approve_assignment(
+                aid, feedback='Approved by automatic transcription parser.')
+        except connection.MTurkRequestError as mtre:
+            # Assignment already approved
+            if mtre.status != 200:
+                raise mtre
 
 
 if __name__ == '__main__':
@@ -89,7 +75,8 @@ if __name__ == '__main__':
         print "batch."
         exit(1)
 
-    dbconn = create_sqlite_connection('results.db')
+    transcribed_rate_gateway = models.TranscribedRateDataGateway('results.db')
+    transcribed_rate_gateway.create_table()
 
     batch_id = int(sys.argv[1])
 
@@ -117,21 +104,13 @@ if __name__ == '__main__':
        parse_turk_results.print_rate_results(each.HITId, each.WorkerId, rates)
 
     for hit_id, assignment_ids in accepted_hits.iteritems():
-        for aid in assignment_ids:
-            print 'Approved {}'.format(aid)
-            try:
-                conn.approve_assignment(aid, feedback='Approved by automatic transcription parser.')
-            except connection.MTurkRequestError as mtre:
-                # Assignment already approved
-                if mtre.status != 200:
-                    raise mtre
-
-    for hit_id, assignment_ids in accepted_hits.iteritems():
         if len(assignment_ids) >= 2:
-            print '\nAccepted Assignment ({} - {})'.format(
-                hit_id, assignment_ids[0])
+            accept_assignments_with_ids(conn, assignment_ids)
+            print
+            print termcolor.colored('Accepted Assignment', attrs=['bold'])
+            print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
+            print termcolor.colored('AssignmentId: {}'.format(assignment_ids[0]), attrs=['bold'])
             rates = assignment_to_rates[assignment_ids[0]]
-            write_rates(dbconn, hit_id, rates)
+            new_rate = models.TranscribedRate(hit_id=hit_id, rates=rates)
+            transcribed_rate_gateway.save(new_rate)
             print rates
-
-    dbconn.close()
