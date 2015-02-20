@@ -52,8 +52,8 @@ def parser_results_are_equal(results_a, results_b):
 def accept_assignments_with_ids(mturk_conn, assignment_ids):
     """Accepts all of the assignments with the given ids.
 
-    :param mturk_connection: A mechanical turk connection
-    :type mturk_connection: mturk.connection.Connection
+    :param mturk_conn: A mechanical turk connection
+    :type mturk_conn: mturk.connection.Connection
     :param assignment_ids: A list of assignment ids
     :type assignment_ids: list of str or unicode
     """
@@ -111,6 +111,7 @@ if __name__ == '__main__':
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
             print termcolor.colored('AssignmentId: {}'.format(assignment_ids[0]), attrs=['bold'])
             rates = assignment_to_rates[assignment_ids[0]]
-            new_rate = models.TranscribedRate(hit_id=hit_id, rates=rates)
+            new_rate = models.TranscribedRate(
+                hit_id=hit_id, batch_id=batch_id, rates=rates)
             transcribed_rate_gateway.save(new_rate)
             print rates
