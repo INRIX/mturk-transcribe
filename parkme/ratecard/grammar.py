@@ -11,6 +11,7 @@
 import pyparsing
 
 
+# Global - stack containing all user visible notes accumulated during parsing.
 user_visible_notes = []
 
 
@@ -36,6 +37,7 @@ def decimalize_price(t):
 
 
 def push_user_visible_note(val, loc, toks):
+    """Push a user visible note onto the stack of notes"""
     user_visible_notes.append(val)
 
 
