@@ -9,6 +9,8 @@
 """
 import itertools
 
+from boto.mturk import connection
+
 from parkme.turk import hits
 
 
@@ -24,7 +26,8 @@ def map_hits_to_assignments(hits, mturk_connection):
     hit_ids = itertools.imap(lambda x: x.HITId, hits)
     assignments_for_hits = itertools.imap(
         mturk_connection.get_assignments, hit_ids)
-    return itertools.chain(*assignments_for_hits)
+    return itertools.imap(
+        lambda x: Assignment(x), itertools.chain(*assignments_for_hits))
 
 
 def get_answer_to_question(assignment, question_id):
@@ -42,8 +45,53 @@ def get_answer_to_question(assignment, question_id):
             return each
 
 
+class Assignment(object):
+    """Entity representing a Mechanical Turk assignment."""
+
+    _EMPTY = object()
+
+    def __init__(self, assignment):
+        """Initialize assignment entity.
+
+        :param assignment: An assignment
+        :type assignment: boto.mturk.Assignment
+        """
+        self.assignment = assignment
+        self._rates = self._EMPTY
+
+    @property
+    def rates(self):
+        """Return the rates associated with this assignment.
+
+        :rtype: str or unicode or None
+        """
+        if self._rates is self._EMPTY:
+            rate_answers = get_answer_to_question(self.assignment, 'Rates')
+            self._rates = (rate_answers.fields[0].lower()
+                           if rate_answers and rate_answers.fields
+                           else None)
+        return self._rates
+
+    @property
+    def assignment_id(self):
+        """Assignment ID for this assignment"""
+        return self.assignment.AssignmentId
+
+    @property
+    def hit_id(self):
+        """HIT ID for this assignment"""
+        return self.assignment.HITId
+
+    @property
+    def worker_id(self):
+        """Worker ID for this assignment"""
+        return self.assignment.WorkerId
+
+
 class AssignmentGateway(object):
     """Gateway using a MTurk connection to get at assignments."""
+
+    _DEFAULT = object()
 
     def __init__(self, mturk_connection):
         """Initialize a new gateway.
@@ -73,10 +121,41 @@ class AssignmentGateway(object):
         hits_in_batch = hits.filter_by_batch_id(all_hits, batch_id)
         return map_hits_to_assignments(hits_in_batch, self.mturk_connection)
 
-    def accept(self, assignment):
-        """Accept the given assignment"""
-        pass
+    def accept(self, assignment, feedback=_DEFAULT):
+        """Accept the given assignment. Ignores exception thrown when
+        assignment has already been accepted.
 
-    def reject(self, assignment):
-        """Reject the given assignment"""
-        pass
+        :param assignment: An assignment
+        :type assignment: Assignment
+        :param feedback: Feedback message (Defaults to generic message)
+        :type feedback: str or unicode or _DEFAULT
+        """
+        feedback = ('Great work! Automatically approved by rate parser.'
+                    if feedback is self._DEFAULT
+                    else feedback)
+        try:
+            self.mturk_connection.accept_assignment(
+                assignment.assignment_id, feedback=feedback)
+        except connection.MTurkRequestError as mtre:
+            if mtre.status != 200:
+                raise mtre
+
+    def reject(self, assignment, feedback=_DEFAULT):
+        """Reject the given assignment. Ignores exception thrown when
+        assignment has already been rejected.
+
+        :param assignment: An assignment
+        :type assignment: Assignment
+        :param feedback: Feedback message (Defaults to generic message)
+        :type feedback: str or unicode or _DEFAULT
+        """
+        feedback = (
+            "We're sorry, this HIT was flagged as malformed by our rate parser"
+            if feedback is self_DEFAULT
+            else feedback)
+        try:
+            self.mturk_connection.reject_assignment(
+                assignment.assignment_id, feedback=feedback)
+        except connection.MTurkRequestError as mtre:
+            if mtre.status != 200:
+                raise mtre

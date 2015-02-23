@@ -133,33 +133,32 @@ if __name__ == '__main__':
     all_assignments = get_all_assignments(conn)
 
     for each in all_assignments:
-       rates = get_rates(each)
-
-       if not rates:
+       if not each.rates:
            continue
 
        results, notes, rejected = parse_turk_results.parse_or_reject_answers(
-           rates)
+           each.rates)
 
        if rejected:
-           rejected_hits[each.HITId].append(each.AssignmentId)
+           rejected_hits[each.hit_id].append(each.assignment_id)
        else:
-           assignment_to_rates[each.AssignmentId] = '\r\n'.join([
+           assignment_to_rates[each.assignment_id] = '\r\n'.join([
                t[1] for t in results if t[1].strip()])
-           assignment_to_results[each.AssignmentId] = [
+           assignment_to_results[each.assignment_id] = [
                t[1] for t in results if t[1]]
-           assignment_to_notes[each.AssignmentId] = '\r\n'.join([
+           assignment_to_notes[each.assignment_id] = '\r\n'.join([
                t for t in notes])
-           accepted_hits[each.HITId].append(each.AssignmentId)
+           accepted_hits[each.hit_id].append(each.assignment_id)
 
-       parse_turk_results.print_rate_results(each.HITId, each.WorkerId, rates)
+       parse_turk_results.print_rate_results(
+           each.hit_id, each.worker_id, each.rates)
 
     for hit_id, assignment_ids in rejected_hits.iteritems():
         #reject_assignments_with_ids(conn, assignment_ids)
         pass
 
     for hit_id, assignment_ids in accepted_hits.iteritems():
-        if len(assignment_ids) >= 2:
+        if len(assignment_ids) == 2:
             print
             #accept_assignments_with_ids(conn, assignment_ids)
             print parser_results_are_equal(
