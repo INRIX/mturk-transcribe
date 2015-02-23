@@ -37,10 +37,7 @@ def parser_results_are_equal(results_a, results_b):
     :type results_b: list
     :rtype: bool
     """
-    for each in results_a:
-        if each not in results_b:
-            return False
-    return True
+    return set(results_a) == set(results_b)
 
 
 # Criteria for acceptance
@@ -128,6 +125,7 @@ if __name__ == '__main__':
     accepted_hits = collections.defaultdict(list)
     assignment_to_rates = {}
     assignment_to_notes = {}
+    assignment_to_results = {}
 
     conn = connection.MTurkConnection(
        aws_access_key_id=AWS_ACCESS_KEY_ID,
@@ -148,6 +146,8 @@ if __name__ == '__main__':
        else:
            assignment_to_rates[each.AssignmentId] = '\r\n'.join([
                t[1] for t in results if t[1].strip()])
+           assignment_to_results[each.AssignmentId] = [
+               t[1] for t in results if t[1]]
            assignment_to_notes[each.AssignmentId] = '\r\n'.join([
                t for t in notes])
            accepted_hits[each.HITId].append(each.AssignmentId)
@@ -160,11 +160,15 @@ if __name__ == '__main__':
 
     for hit_id, assignment_ids in accepted_hits.iteritems():
         if len(assignment_ids) >= 2:
-            #accept_assignments_with_ids(conn, assignment_ids)
             print
+            #accept_assignments_with_ids(conn, assignment_ids)
+            print parser_results_are_equal(
+                assignment_to_results[assignment_ids[0]],
+                assignment_to_results[assignment_ids[1]])
             print termcolor.colored('Accepted Assignment', attrs=['bold'])
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
-            print termcolor.colored('AssignmentId: {}'.format(assignment_ids[0]), attrs=['bold'])
+            print termcolor.colored(
+                'AssignmentId: {}'.format(assignment_ids[0]), attrs=['bold'])
             rates = assignment_to_rates[assignment_ids[0]]
             notes = assignment_to_notes[assignment_ids[0]]
             new_rate = models.TranscribedRate(

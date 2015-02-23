@@ -9,6 +9,8 @@
 """
 import itertools
 
+from parkme.turk import hits
+
 
 def map_hits_to_assignments(hits, mturk_connection):
     """Generator that converts the given HITs into Assignments.
@@ -38,3 +40,43 @@ def get_answer_to_question(assignment, question_id):
     for each in assignment.answers[0]:
         if each.qid == question_id:
             return each
+
+
+class AssignmentGateway(object):
+    """Gateway using a MTurk connection to get at assignments."""
+
+    def __init__(self, mturk_connection):
+        """Initialize a new gateway.
+
+        :param mturk_connection: A Mechanical Turk connection
+        :type mturk_connection: boto.mturk.Connection
+        """
+        self.mturk_connection = mturk_connection
+
+    @classmethod
+    def get(cls, mturk_connection):
+        """Simple MVC-like method for returning a new gateway.
+
+        :param mturk_connection: A Mechanical Turk connection
+        :type mturk_connection: boto.mturk.Connection
+        """
+        return cls(mturk_connection)
+
+    def get_by_batch_id(self, batch_id):
+        """Return all the assignments in the given batch.
+
+        :param batch_id: A batch id
+        :type batch_id: int or str or unicode
+        :rtype: iterable of boto.mturk.Assignment
+        """
+        all_hits = list(self.mturk_connection.get_all_hits())
+        hits_in_batch = hits.filter_by_batch_id(all_hits, batch_id)
+        return map_hits_to_assignments(hits_in_batch, self.mturk_connection)
+
+    def accept(self, assignment):
+        """Accept the given assignment"""
+        pass
+
+    def reject(self, assignment):
+        """Reject the given assignment"""
+        pass
