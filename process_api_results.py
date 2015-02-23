@@ -87,6 +87,30 @@ def reject_assignments_with_ids(mturk_conn, assignment_ids):
                 raise mtre
 
 
+def get_all_assignments(conn):
+    """Return all the available assignments on mechanical turk.
+
+    :param conn: A Mechanical Turk connection
+    :type conn: boto.mturk.MTurkConnection
+    :rtype: iterable
+    """
+    all_hits = list(conn.get_all_hits())
+    hits_in_batch = hits.filter_by_batch_id(all_hits, batch_id)
+    return assignments.map_hits_to_assignments(hits_in_batch, conn)
+
+
+def get_rates(assignment):
+    """Return the rates answer associated with the given assignment.
+
+    :param assignment: An assignment
+    :type assignment: boto.mturk.Assignment
+    :rtype: str or unicode or None
+    """
+    rate_answers = assignments.get_answer_to_question(assignment, 'Rates')
+    if rate_answers and rate_answers.fields:
+        return rate_answers.fields[0].lower()
+    return None
+
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
@@ -108,12 +132,14 @@ if __name__ == '__main__':
     conn = connection.MTurkConnection(
        aws_access_key_id=AWS_ACCESS_KEY_ID,
        aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-    all_hits = list(conn.get_all_hits())
-    hits_in_batch = hits.filter_by_batch_id(all_hits, batch_id)
-    all_assignments = assignments.map_hits_to_assignments(hits_in_batch, conn)
+    all_assignments = get_all_assignments(conn)
 
     for each in all_assignments:
-       rates = assignments.get_answer_to_question(each, 'Rates').fields[0].lower()
+       rates = get_rates(each)
+
+       if not rates:
+           continue
+
        results, notes, rejected = parse_turk_results.parse_or_reject_answers(
            rates)
 
@@ -134,7 +160,7 @@ if __name__ == '__main__':
 
     for hit_id, assignment_ids in accepted_hits.iteritems():
         if len(assignment_ids) >= 2:
-            accept_assignments_with_ids(conn, assignment_ids)
+            #accept_assignments_with_ids(conn, assignment_ids)
             print
             print termcolor.colored('Accepted Assignment', attrs=['bold'])
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
