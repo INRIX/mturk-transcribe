@@ -48,7 +48,9 @@ def get_answer_to_question(assignment, question_id):
 class Assignment(object):
     """Entity representing a Mechanical Turk assignment."""
 
+    # Constants
     _EMPTY = object()
+    _RATES_QUESTION_NAME = 'Rates'
 
     def __init__(self, assignment):
         """Initialize assignment entity.
@@ -59,14 +61,19 @@ class Assignment(object):
         self.assignment = assignment
         self._rates = self._EMPTY
 
+    def __hash__(self):
+        return hash(self.assignment_id)
+
     @property
     def rates(self):
         """Return the rates associated with this assignment.
 
         :rtype: str or unicode or None
         """
+        # Some work to avoid extracting the rates more than once
         if self._rates is self._EMPTY:
-            rate_answers = get_answer_to_question(self.assignment, 'Rates')
+            rate_answers = get_answer_to_question(
+                self.assignment, self._RATES_QUESTION_NAME)
             self._rates = (rate_answers.fields[0].lower()
                            if rate_answers and rate_answers.fields
                            else None)

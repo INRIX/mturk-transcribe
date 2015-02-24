@@ -17,17 +17,6 @@ AWS_ACCESS_KEY_ID = 'AKIAJFLF5ZQRGKEN3WCQ'
 AWS_SECRET_ACCESS_KEY = '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'
 
 
-def parse_all_results(answers):
-    """For a given list of answer lines return the parser results from each
-    line.
-
-    :param answers: An iterable of answers
-    :type answers: iterable
-    :rtype: list
-    """
-    return [parser.parse_or_reject_line(each) for each in answers]
-
-
 def parser_results_are_equal(results_a, results_b):
     """Indicate whether or not parser results are equal.
     
@@ -38,75 +27,6 @@ def parser_results_are_equal(results_a, results_b):
     :rtype: bool
     """
     return set(results_a) == set(results_b)
-
-
-# Criteria for acceptance
-# 1. The result parsed correctly
-# 2. At least 1 other turk result also parsed correctly
-# Then all correctly parsed results will be accepted.
-
-
-def accept_assignments_with_ids(mturk_conn, assignment_ids):
-    """Accepts all of the assignments with the given ids.
-
-    :param mturk_conn: A mechanical turk connection
-    :type mturk_conn: mturk.connection.Connection
-    :param assignment_ids: A list of assignment ids
-    :type assignment_ids: list of str or unicode
-    """
-    for aid in assignment_ids:
-        print 'Approved {}'.format(aid)
-        try:
-            mturk_conn.approve_assignment(
-                aid, feedback='Approved by automatic transcription parser.')
-        except connection.MTurkRequestError as mtre:
-            # Assignment already approved
-            if mtre.status != 200:
-                raise mtre
-
-
-def reject_assignments_with_ids(mturk_conn, assignment_ids):
-    """Rejects all of the assignments with the given ids.
-
-    :param mturk_conn: A mechanical turk connection
-    :type mturk_conn: mturk.connection.Connection
-    :param assignment_ids: A list of assignment ids
-    :type assignment_ids: list of str or unicode
-    """
-    for aid in assignment_ids:
-        print termcolor.colored('REJECTED {}'.format(aid), 'red')
-        try:
-            mturk_conn.reject_assignment(
-                aid, feedback='Rejected by automatic transcription parser.')
-        except connection.MTurkRequestError as mtre:
-            # Assignment already rejected
-            if mtre.status != 200:
-                raise mtre
-
-
-def get_all_assignments(conn):
-    """Return all the available assignments on mechanical turk.
-
-    :param conn: A Mechanical Turk connection
-    :type conn: boto.mturk.MTurkConnection
-    :rtype: iterable
-    """
-    all_hits = list(conn.get_all_hits())
-    hits_in_batch = hits.filter_by_batch_id(all_hits, batch_id)
-    return assignments.map_hits_to_assignments(hits_in_batch, conn)
-
-
-def get_rates(assignment):
-    """Return the rates answer associated with the given assignment.
-
-    :param assignment: An assignment
-    :type assignment: boto.mturk.Assignment
-    :rtype: str or unicode or None
-    """
-    rate_answers = assignments.get_answer_to_question(assignment, 'Rates')
-    if rate_answers and rate_answers.fields:
-        return rate_answers.fields[0].lower()
-    return None
 
 
 if __name__ == '__main__':
@@ -127,12 +47,12 @@ if __name__ == '__main__':
     assignment_to_notes = {}
     assignment_to_results = {}
 
-    conn = connection.MTurkConnection(
+    mturk_connection = connection.MTurkConnection(
        aws_access_key_id=AWS_ACCESS_KEY_ID,
        aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-    all_assignments = get_all_assignments(conn)
+    assignment_gateway = assignments.AssignmentGateway.get(mturk_connection)
 
-    for each in all_assignments:
+    for each in assignment_gateway.get_by_batch_id(batch_id):
        if not each.rates:
            continue
 
@@ -153,14 +73,10 @@ if __name__ == '__main__':
        parse_turk_results.print_rate_results(
            each.hit_id, each.worker_id, each.rates)
 
-    for hit_id, assignment_ids in rejected_hits.iteritems():
-        #reject_assignments_with_ids(conn, assignment_ids)
-        pass
-
     for hit_id, assignment_ids in accepted_hits.iteritems():
         if len(assignment_ids) == 2:
             print
-            #accept_assignments_with_ids(conn, assignment_ids)
+            #accept_assignments_with_ids(mturk_connection, assignment_ids)
             print parser_results_are_equal(
                 assignment_to_results[assignment_ids[0]],
                 assignment_to_results[assignment_ids[1]])
