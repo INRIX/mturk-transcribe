@@ -70,6 +70,14 @@ if __name__ == '__main__':
         parse_turk_results.print_rate_results(
             each.hit_id, each.worker_id, each.rates)
 
+    for hit_id, assignments in rejected_hits.iteritems():
+        if len(assignments) == 2:
+            print termcolor.colored('POTENTIAL TOO DIFFICULT: {}'.format(hit_id), 'green')
+            manual_review = models.ManualReview(
+                hit_id=hit_id, batch_id=batch_id)
+            manual_review_gateway.save(manual_review)
+        print termcolor.colored('REJECTED {}'.format(hit_id), 'red')
+
     for hit_id, assignments in accepted_hits.iteritems():
         if len(assignments) == 2:
             if not parser_results_are_equal(
