@@ -70,6 +70,11 @@ if __name__ == '__main__':
 
     for hit_id, assignments in accepted_hits.iteritems():
         if len(assignments) == 2:
+            if not parser_results_are_equal(
+                    assignment_to_results[assignments[0]].parsed_rates,
+                    assignment_to_results[assignments[1]].parsed_rates):
+                continue
+
             print
             print parser_results_are_equal(
                 assignment_to_results[assignments[0]].parsed_rates,
@@ -89,3 +94,5 @@ if __name__ == '__main__':
                 rates=results.rates_str,
                 user_notes=results.notes_str)
             transcribed_rate_gateway.save(new_rate)
+
+            # assignment_gateway.accept(results.assignment)
