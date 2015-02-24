@@ -8,6 +8,7 @@ import termcolor
 import parse_turk_results
 from parkme import models
 from parkme.ratecard import parser
+from parkme.ratecard import models as ratecard_models
 from parkme.turk import assignments
 from parkme.turk import hits
 
@@ -31,20 +32,18 @@ def parser_results_are_equal(results_a, results_b):
 
 if __name__ == '__main__':
     if len(sys.argv) < 2:
-        print "Usage: api_test.py [BATCH_ID]"
+        print "Usage: process_api_results.py [BATCH_ID]"
         print "Attempt to validate results from the given Mechanical Turk"
         print "batch."
         exit(1)
 
+    batch_id = int(sys.argv[1])
+
     transcribed_rate_gateway = models.TranscribedRateDataGateway('results.db')
     transcribed_rate_gateway.create_table()
 
-    batch_id = int(sys.argv[1])
-
     rejected_hits = collections.defaultdict(list)
     accepted_hits = collections.defaultdict(list)
-    assignment_to_rates = {}
-    assignment_to_notes = {}
     assignment_to_results = {}
 
     mturk_connection = connection.MTurkConnection(
@@ -53,40 +52,40 @@ if __name__ == '__main__':
     assignment_gateway = assignments.AssignmentGateway.get(mturk_connection)
 
     for each in assignment_gateway.get_by_batch_id(batch_id):
-       if not each.rates:
-           continue
+        if not each.rates:
+            continue
 
-       results, notes, rejected = parse_turk_results.parse_or_reject_answers(
-           each.rates)
+        try:
+            parse_result = ratecard_models.ParseResult.get_for_assignment(each)
+        except ratecard_models.ParseFailedException as pfe:
+            rejected_hits[each.hit_id].append(each.assignment_id)
+            parse_turk_results.print_rate_results(
+                each.hit_id, each.worker_id, each.rates)
+            continue
 
-       if rejected:
-           rejected_hits[each.hit_id].append(each.assignment_id)
-       else:
-           assignment_to_rates[each.assignment_id] = '\r\n'.join([
-               t[1] for t in results if t[1].strip()])
-           assignment_to_results[each.assignment_id] = [
-               t[1] for t in results if t[1]]
-           assignment_to_notes[each.assignment_id] = '\r\n'.join([
-               t for t in notes])
-           accepted_hits[each.hit_id].append(each.assignment_id)
+        accepted_hits[each.hit_id].append(each)
+        assignment_to_results[each] = parse_result
+        parse_turk_results.print_rate_results(
+            each.hit_id, each.worker_id, each.rates)
 
-       parse_turk_results.print_rate_results(
-           each.hit_id, each.worker_id, each.rates)
-
-    for hit_id, assignment_ids in accepted_hits.iteritems():
-        if len(assignment_ids) == 2:
+    for hit_id, assignments in accepted_hits.iteritems():
+        if len(assignments) == 2:
             print
-            #accept_assignments_with_ids(mturk_connection, assignment_ids)
             print parser_results_are_equal(
-                assignment_to_results[assignment_ids[0]],
-                assignment_to_results[assignment_ids[1]])
+                assignment_to_results[assignments[0]].parsed_rates,
+                assignment_to_results[assignments[1]].parsed_rates)
             print termcolor.colored('Accepted Assignment', attrs=['bold'])
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
             print termcolor.colored(
-                'AssignmentId: {}'.format(assignment_ids[0]), attrs=['bold'])
-            rates = assignment_to_rates[assignment_ids[0]]
-            notes = assignment_to_notes[assignment_ids[0]]
+                'AssignmentId: {}'.format(assignments[0].assignment_id),
+                attrs=['bold'])
+
+            results = assignment_to_results[assignments[0]]
+            print results.rates_str
+
             new_rate = models.TranscribedRate(
-                hit_id=hit_id, batch_id=batch_id, rates=rates, user_notes=notes)
+                hit_id=hit_id,
+                batch_id=batch_id,
+                rates=results.rates_str,
+                user_notes=results.notes_str)
             transcribed_rate_gateway.save(new_rate)
-            print rates

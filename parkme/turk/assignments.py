@@ -124,7 +124,7 @@ class AssignmentGateway(object):
         :type batch_id: int or str or unicode
         :rtype: iterable of boto.mturk.Assignment
         """
-        all_hits = list(self.mturk_connection.get_all_hits())
+        all_hits = self.mturk_connection.get_all_hits()
         hits_in_batch = hits.filter_by_batch_id(all_hits, batch_id)
         return map_hits_to_assignments(hits_in_batch, self.mturk_connection)
 
