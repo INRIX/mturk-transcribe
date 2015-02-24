@@ -41,6 +41,8 @@ if __name__ == '__main__':
 
     transcribed_rate_gateway = models.TranscribedRateDataGateway('results.db')
     transcribed_rate_gateway.create_table()
+    manual_review_gateway = models.ManualReviewDataGateway('results.db')
+    manual_review_gateway.create_table()
 
     rejected_hits = collections.defaultdict(list)
     accepted_hits = collections.defaultdict(list)
@@ -73,12 +75,14 @@ if __name__ == '__main__':
             if not parser_results_are_equal(
                     assignment_to_results[assignments[0]].parsed_rates,
                     assignment_to_results[assignments[1]].parsed_rates):
+                print
+                print termcolor.colored('RESULT MISMATCH: {}'.format(hit_id), attrs='bold')
+                manual_review = models.ManualReview(
+                    hit_id=hit_id, batch_id=batch_id)
+                manual_review_gateway.save(manual_review)
                 continue
 
             print
-            print parser_results_are_equal(
-                assignment_to_results[assignments[0]].parsed_rates,
-                assignment_to_results[assignments[1]].parsed_rates)
             print termcolor.colored('Accepted Assignment', attrs=['bold'])
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
             print termcolor.colored(
