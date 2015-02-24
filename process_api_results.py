@@ -103,6 +103,7 @@ if __name__ == '__main__':
             new_rate = models.TranscribedRate(
                 hit_id=hit_id,
                 batch_id=batch_id,
+                lot_id=results.assignment.lot_id,
                 rates=results.rates_str,
                 user_notes=results.notes_str)
             transcribed_rate_gateway.save(new_rate)

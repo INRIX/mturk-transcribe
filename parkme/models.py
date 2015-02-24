@@ -12,7 +12,7 @@ import sqlite3
 
 # Base entity objects
 TranscribedRate = collections.namedtuple(
-    'TranscribedRate', ['hit_id', 'batch_id', 'rates', 'user_notes'])
+    'TranscribedRate', ['hit_id', 'batch_id', 'lot_id', 'rates', 'user_notes'])
 ManualReview = collections.namedtuple(
     'ManualReview', ['hit_id', 'batch_id'])
 
@@ -41,7 +41,7 @@ class TranscribedRateDataGateway(BaseDataGateway):
         cursor = self.dbconn.cursor()
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS transcribed_rates
-        (hit_id TEXT PRIMARY KEY, batch_id INTEGER, result TEXT,
+        (hit_id TEXT PRIMARY KEY, batch_id INTEGER, lot_id TEXT, result TEXT,
         user_notes TEXT)
         ''')
         cursor.execute('''
@@ -63,8 +63,9 @@ class TranscribedRateDataGateway(BaseDataGateway):
         """
         cursor = self.dbconn.cursor()
         cursor.execute(
-            "INSERT OR REPLACE INTO transcribed_rates VALUES (?, ?, ?, ?)",
-            (rate.hit_id, rate.batch_id, rate.rates, rate.user_notes))
+            "INSERT OR REPLACE INTO transcribed_rates VALUES (?, ?, ?, ?, ?)",
+            (rate.hit_id, rate.batch_id,
+             rate.lot_id, rate.rates, rate.user_notes))
         self.dbconn.commit()
         return rate
 

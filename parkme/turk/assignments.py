@@ -51,6 +51,7 @@ class Assignment(object):
     # Constants
     _EMPTY = object()
     _RATES_QUESTION_NAME = 'Rates'
+    _LOTID_QUESTION_NAME = 'LotId'
 
     def __init__(self, assignment):
         """Initialize assignment entity.
@@ -60,6 +61,7 @@ class Assignment(object):
         """
         self.assignment = assignment
         self._rates = self._EMPTY
+        self._lot_id = self._EMPTY
 
     def __hash__(self):
         return hash(self.assignment_id)
@@ -78,6 +80,20 @@ class Assignment(object):
                            if rate_answers and rate_answers.fields
                            else None)
         return self._rates
+
+    @property
+    def lot_id(self):
+        """Return the lot id associated with this assignment.
+
+        :rtype: str or unicode or None
+        """
+        if self._lot_id is self._EMPTY:
+            lot_id_answers = get_answer_to_question(
+                self.assignment, self._LOTID_QUESTION_NAME)
+            self._lot_id = (lot_id_answers.fields[0].lower()
+                            if lot_id_answers and lot_id_answers.fields
+                            else None)
+        return self._lot_id
 
     @property
     def assignment_id(self):
