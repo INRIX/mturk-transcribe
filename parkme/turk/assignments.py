@@ -157,7 +157,7 @@ class AssignmentGateway(object):
                     if feedback is self._DEFAULT
                     else feedback)
         try:
-            self.mturk_connection.accept_assignment(
+            self.mturk_connection.approve_assignment(
                 assignment.assignment_id, feedback=feedback)
         except connection.MTurkRequestError as mtre:
             if mtre.status != 200:

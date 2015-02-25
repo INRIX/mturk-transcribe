@@ -108,4 +108,5 @@ if __name__ == '__main__':
                 user_notes=results.notes_str)
             transcribed_rate_gateway.save(new_rate)
 
-            # assignment_gateway.accept(results.assignment)
+            for each in assignments:
+                assignment_gateway.accept(assignment_to_results[each].assignment)
