@@ -117,6 +117,7 @@ class RateTranscriptionAssignment(BaseAssignment):
         if self._rates is self._EMPTY:
             self._rates = self.get_answer_to_question(
                 self._RATES_QUESTION_NAME)
+            self._rates = self._rates.lower() if self._rates else None
         return self._rates
 
     @property
