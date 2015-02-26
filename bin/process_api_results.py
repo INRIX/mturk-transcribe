@@ -1,6 +1,8 @@
+import sys
+sys.path.append('')
+
 import collections
 import sqlite3
-import sys
 
 from boto.mturk import connection
 import termcolor

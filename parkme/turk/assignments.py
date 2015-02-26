@@ -153,7 +153,7 @@ class AssignmentGateway(object):
         :param feedback: Feedback message (Defaults to generic message)
         :type feedback: str or unicode or _DEFAULT
         """
-        feedback = ('Great work! Automatically approved by rate parser.'
+        feedback = ('Great work! Automatically approved.'
                     if feedback is self._DEFAULT
                     else feedback)
         try:
@@ -173,7 +173,7 @@ class AssignmentGateway(object):
         :type feedback: str or unicode or _DEFAULT
         """
         feedback = (
-            "We're sorry, this HIT was flagged as malformed by our rate parser"
+            "We're sorry, this HIT was not approved."
             if feedback is self_DEFAULT
             else feedback)
         try:
