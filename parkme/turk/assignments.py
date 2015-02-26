@@ -14,20 +14,22 @@ from boto.mturk import connection
 from parkme.turk import hits
 
 
-def map_hits_to_assignments(hits, mturk_connection):
+def map_hits_to_assignments(hits, mturk_connection, assignment_cls):
     """Generator that converts the given HITs into Assignments.
 
     :param hits: An iterable of HITs
     :type hits: mturk.connection.HIT
     :param mturk_connection: The Mechanical Turk connection
     :type mturk_connection: mturk.connection.MTurkConnection
+    :param assignment_cls: The assignment class
+    :type assignment_cls: parkme.assignments.BaseAssignment
     :rtype: iterable of mturk.connection.Assignment
     """
     hit_ids = itertools.imap(lambda x: x.HITId, hits)
     assignments_for_hits = itertools.imap(
         mturk_connection.get_assignments, hit_ids)
     return itertools.imap(
-        lambda x: Assignment(x), itertools.chain(*assignments_for_hits))
+        lambda x: assignment_cls(x), itertools.chain(*assignments_for_hits))
 
 
 def get_answer_to_question(assignment, question_id):
@@ -45,55 +47,22 @@ def get_answer_to_question(assignment, question_id):
             return each
 
 
-class Assignment(object):
+class BaseAssignment(object):
     """Entity representing a Mechanical Turk assignment."""
 
     # Constants
     _EMPTY = object()
-    _RATES_QUESTION_NAME = 'Rates'
-    _LOTID_QUESTION_NAME = 'LotId'
 
     def __init__(self, assignment):
         """Initialize assignment entity.
-
+        
         :param assignment: An assignment
         :type assignment: boto.mturk.Assignment
         """
         self.assignment = assignment
-        self._rates = self._EMPTY
-        self._lot_id = self._EMPTY
 
     def __hash__(self):
         return hash(self.assignment_id)
-
-    @property
-    def rates(self):
-        """Return the rates associated with this assignment.
-
-        :rtype: str or unicode or None
-        """
-        # Some work to avoid extracting the rates more than once
-        if self._rates is self._EMPTY:
-            rate_answers = get_answer_to_question(
-                self.assignment, self._RATES_QUESTION_NAME)
-            self._rates = (rate_answers.fields[0].lower()
-                           if rate_answers and rate_answers.fields
-                           else None)
-        return self._rates
-
-    @property
-    def lot_id(self):
-        """Return the lot id associated with this assignment.
-
-        :rtype: str or unicode or None
-        """
-        if self._lot_id is self._EMPTY:
-            lot_id_answers = get_answer_to_question(
-                self.assignment, self._LOTID_QUESTION_NAME)
-            self._lot_id = (lot_id_answers.fields[0].lower()
-                            if lot_id_answers and lot_id_answers.fields
-                            else None)
-        return self._lot_id
 
     @property
     def assignment_id(self):
@@ -110,6 +79,57 @@ class Assignment(object):
         """Worker ID for this assignment"""
         return self.assignment.WorkerId
 
+    def get_answer_to_question(self, question_name):
+        """Return the answer for the question with the given name.
+
+        :param question_name: The question name
+        :type question_name: str or unicode
+        :rtype: str or unicode or None
+        """
+        answers = get_answer_to_question(self.assignment, question_name)
+        return answers.fields[0] if answers and answers.fields else None
+
+
+class RateTranscriptionAssignment(BaseAssignment):
+    """Represents a rate transcription assignment
+    TODO: Break this out into a file for application-specific models
+    """
+    
+    _RATES_QUESTION_NAME = 'Rates'
+    _LOTID_QUESTION_NAME = 'LotId'
+
+    def __init__(self, assignment):
+        """Initialize assignment entity.
+
+        :param assignment: An assignment
+        :type assignment: boto.mturk.Assignment
+        """
+        super(RateTranscriptionAssignment, self).__init__(assignment)
+        self._rates = self._EMPTY
+        self._lot_id = self._EMPTY
+
+    @property
+    def rates(self):
+        """Return the rates associated with this assignment.
+
+        :rtype: str or unicode or None
+        """
+        if self._rates is self._EMPTY:
+            self._rates = self.get_answer_to_question(
+                self._RATES_QUESTION_NAME)
+        return self._rates
+
+    @property
+    def lot_id(self):
+        """Return the lot id associated with this assignment.
+
+        :rtype: str or unicode or None
+        """
+        if self._lot_id is self._EMPTY:
+            self._lot_id = self.get_answer_to_question(
+                self._LOTID_QUESTION_NAME)
+        return self._lot_id
+    
 
 class AssignmentGateway(object):
     """Gateway using a MTurk connection to get at assignments."""
@@ -133,7 +153,7 @@ class AssignmentGateway(object):
         """
         return cls(mturk_connection)
 
-    def get_by_batch_id(self, batch_id):
+    def get_by_batch_id(self, batch_id, assignment_cls):
         """Return all the assignments in the given batch.
 
         :param batch_id: A batch id
@@ -142,7 +162,8 @@ class AssignmentGateway(object):
         """
         all_hits = self.mturk_connection.get_all_hits()
         hits_in_batch = hits.filter_by_batch_id(all_hits, batch_id)
-        return map_hits_to_assignments(hits_in_batch, self.mturk_connection)
+        return map_hits_to_assignments(
+            hits_in_batch, self.mturk_connection, assignment_cls)
 
     def accept(self, assignment, feedback=_DEFAULT):
         """Accept the given assignment. Ignores exception thrown when

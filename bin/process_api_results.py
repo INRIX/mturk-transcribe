@@ -54,8 +54,10 @@ if __name__ == '__main__':
        aws_access_key_id=AWS_ACCESS_KEY_ID,
        aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     assignment_gateway = assignments.AssignmentGateway.get(mturk_connection)
+    all_assignments = assignment_gateway.get_by_batch_id(
+        batch_id, assignments.RateTranscriptionAssignment)
 
-    for each in assignment_gateway.get_by_batch_id(batch_id):
+    for each in all_assignments:
         if not each.rates:
             continue
 
