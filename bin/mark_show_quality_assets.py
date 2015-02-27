@@ -3,8 +3,6 @@ import sys
 sys.path.append('')
 
 import collections
-import itertools
-import pprint
 
 import psycopg2
 
@@ -40,7 +38,7 @@ def mark_asset_as_approved(conn, asset_id):
     """
     cur = conn.cursor()
     cur.execute(
-        'UPDATE asset SET pk_asset_status=2 WHERE pk_asset=%s;'
+        'UPDATE asset SET pk_asset_status=2 WHERE pk_asset=%s;',
         (asset_id,))
 
 
