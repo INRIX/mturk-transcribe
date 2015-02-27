@@ -7,6 +7,17 @@ import csv
 import psycopg2
 
 
+def convert_row_to_csv_row(row):
+    """Convert a row using our query into a row for output in CSV.
+
+    :param row: A row
+    :type row: tuple
+    :rtype: tuple
+    """
+    # Format is image_url, asset_id
+    return '{}/{}'.format(row[2], row[3]), row[1]
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "Usage: turkable_assets_to_csv.py [CSVFILE]"
@@ -16,7 +27,6 @@ if __name__ == '__main__':
 
     conn = psycopg2.connect("dbname=pim user=pim")
     cur = conn.cursor()
-    field_names = ['lot_id', 'asset_id', 'str_bucket', 'str_path', 'dt_create_date']
     cur.execute('''
     SELECT asset.pk_lot, pk_asset, str_bucket, str_path, asset.dt_create_date
     FROM asset
@@ -26,9 +36,12 @@ if __name__ == '__main__':
     AND (str_rates IS NULL OR str_rates = '')
     AND pk_lot_status != 7 ORDER BY asset.dt_create_date DESC;
     ''')
+
+    output_field_names = ['image_url', 'asset_id']
+
     with open(sys.argv[1], 'wb+') as csvfile:
         csvwriter = csv.writer(csvfile)
-        csvwriter.writerow(field_names)
+        csvwriter.writerow(output_field_names)
         for each in cur:
-            csvwriter.writerow(each)
+            csvwriter.writerow(convert_row_to_csv_row(each))
     conn.close()
