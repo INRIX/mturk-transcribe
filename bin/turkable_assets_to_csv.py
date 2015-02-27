@@ -15,7 +15,7 @@ def convert_row_to_csv_row(row):
     :rtype: tuple
     """
     # Format is image_url, asset_id
-    return '{}/{}'.format(row[2], row[3]), row[1]
+    return 'http://{}/{}'.format(row[2], row[3]), row[1]
 
 
 if __name__ == '__main__':
