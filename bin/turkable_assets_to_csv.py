@@ -15,7 +15,7 @@ def convert_row_to_csv_row(row):
     :rtype: tuple
     """
     # Format is image_url, asset_id
-    return 'http://{}/{}'.format(row[2], row[3]), row[1]
+    return 'http://{}/{}'.format(row[1], row[2]), row[1]
 
 
 if __name__ == '__main__':
@@ -28,15 +28,17 @@ if __name__ == '__main__':
     conn = psycopg2.connect("dbname=pim user=pim")
     cur = conn.cursor()
     cur.execute('''
-    SELECT asset.pk_lot, pk_asset, str_bucket, str_path, asset.dt_create_date
-    FROM asset
-    LEFT JOIN lot USING (pk_lot)
-    WHERE
-    pk_asset_status = 1
-    AND (str_rates IS NULL OR str_rates = '')
-    AND pk_lot_status != 7 ORDER BY asset.dt_create_date DESC;
+    SELECT assetct.pk_asset, str_bucket, str_path FROM (
+       SELECT
+       asset.*, COUNT(asset_lot_asset_type_xref.*) AS category_count
+       FROM asset LEFT OUTER JOIN asset_lot_asset_type_xref
+       USING (pk_asset) GROUP BY pk_asset
+    ) AS assetct LEFT JOIN lot USING(pk_lot)
+    WHERE pk_asset_status=1
+    AND (str_rates IS NULL OR str_rates='')
+    AND pk_lot_status != 7
+    AND assetct.category_count=0;
     ''')
-
     output_field_names = ['image_url', 'asset_id']
 
     with open(sys.argv[1], 'wb+') as csvfile:
