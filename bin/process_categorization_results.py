@@ -2,11 +2,75 @@ import sys
 sys.path.append('')
 
 import collections
+import uuid
 
 from boto.mturk import connection
+import psycopg2
 
 from parkme import settings
 from parkme.turk import assignments
+
+
+# Constants taken from ParkMe app.
+CATEGORY_TO_LOT_ASSET_TYPE = {
+    'rates': 4,
+    'entrance': 2,
+    'hours': 5
+}
+
+
+def has_most_common_category(assignments):
+    """Indicates whether or not there is a most common category in the given
+    list of assignments.
+
+    :param assignments: A list of assignments
+    :type assignments: list
+    :rtype: bool
+    """
+    if len(assignments) < 2:
+        return False
+
+    results = collections.Counter([
+        '|'.join(each.categories) for each in assignments])
+    most_common = results.most_common(2)
+    return len(most_common) == 1 or most_common[0][1] > most_common[1][1]
+
+
+def get_most_common_category(assignments):
+    """Return the most common category.
+
+    :param assignments: a list of assignments
+    :type assignments: list
+    :rtype: bool
+    """
+    if len(assignments) < 2:
+        return False
+
+    results = collections.Counter([
+        '|'.join(each.categories) for each in assignments])
+    most_common = results.most_common(1)
+    return most_common[0][0].split('|')
+
+
+def set_categories_for_asset(asset_id, categories):
+    """Update the ParkMe asset with the given ID to have the given
+    categories.
+
+    :param asset_id: An asset id
+    :type asset_id: str or unicode
+    :param categories: A list of categories
+    :type categories: list
+    """
+    conn = psycopg2.connect("dbname=pim user=pim")
+    cur = conn.cursor()
+    for each in categories:
+        lot_asset_type_id = CATEGORY_TO_LOT_ASSET_TYPE[each.lower()]
+        cur.execute('''
+        INSERT INTO asset_lot_asset_type_xref
+        (pk_asset_lot_asset_type_xref, pk_asset, pk_lot_asset_type,
+        str_create_who, dt_create_date, str_modified_who, dt_modified_date)
+        VALUES (?, ?, ?, 'mturk', now(), 'mturk', now())
+        ''', str(uuid.uuid4()), asset_id, lot_asset_type_id)
 
 
 if __name__ == '__main__':
@@ -32,12 +96,15 @@ if __name__ == '__main__':
 
     # Check for any assignments where the answers do not match
     for asset_id, assignments in assignments_for_assets.iteritems():
-        if all([
-                set(each.categories) == set(assignments[0].categories)
-                for each in assignments[1:]]):
-            print "{} ACCEPTED".format(asset_id)
-            for each in assignments:
-                assignment_gateway.accept(each)
+        if len(assignments) == 3:
+            if has_most_common_category(assignments):
+                print '{} ACCEPTED'.format(assignments[0].hit_id)
+                winning_categories = get_most_common_category(assignments)
+                for each in assignments:
+                    assignment_gateway.accept(each)
+            else:
+                print "{} REJECTED".format(assignments[0].hit_id)
+                print assignments[0].hit_id
         else:
-            print "{} REJECTED".format(asset_id)
+            print '{} NOT ENOUGH'.format(assignments[0].hit_id)
         print [each.categories for each in assignments]
