@@ -97,7 +97,7 @@ class BaseAssignment(object):
         :type question_name: str or unicode
         :rtype: list
         """
-        answer = self.get_answer_to_question(self.assignment, question_name)
+        answer = self.get_answer_to_question(question_name)
         return answer.fields[0].split('|')
 
 
