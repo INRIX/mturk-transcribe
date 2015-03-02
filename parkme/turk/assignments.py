@@ -124,8 +124,9 @@ class ImageCategorizationAssignment(BaseAssignment):
         :rtype: list or str or unicode
         """
         if self._categories is self._EMPTY:
-            self._categories = self.get_all_answers_to_question(
+            self._categories = self.get_answer_to_question(
                 self._CATEGORIES_QUESTION_NAME)
+            self._categories = self._categories.split('|')
         return self._categories
 
     @property
