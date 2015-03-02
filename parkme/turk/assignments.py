@@ -79,17 +79,6 @@ class BaseAssignment(object):
         """Worker ID for this assignment"""
         return self.assignment.WorkerId
 
-    def get_all_answers_to_question(self, question_name):
-        """Return a list containing all the answers to the question with the
-        given name.
-
-        :param question_name: The question name
-        :type question_name: str or unicode
-        :rtype: list
-        """
-        answer = get_answer_to_question(self.assignment, question_name)
-        return answer.fields
-
     def get_answer_to_question(self, question_name):
         """Return the answer for the question with the given name.
 
@@ -97,8 +86,19 @@ class BaseAssignment(object):
         :type question_name: str or unicode
         :rtype: str or unicode or None
         """
-        answers = self.get_all_answers_to_question(question_name)
-        return answers[0] if answers else None
+        answers = get_answer_to_question(question_name)
+        return answers.fields[0] if answers.fields else None
+
+    def get_multichoice_answers_to_question(self, question_name):
+        """Return a list containing all the answers to the question with the
+        given name.
+
+        :param question_name: The question name
+        :type question_name: str or unicode
+        :rtype: list
+        """
+        answer = self.get_answer_to_question(self.assignment, question_name)
+        return answer.fields[0].split('|')
 
 
 class ImageCategorizationAssignment(BaseAssignment):
@@ -124,9 +124,8 @@ class ImageCategorizationAssignment(BaseAssignment):
         :rtype: list or str or unicode
         """
         if self._categories is self._EMPTY:
-            self._categories = self.get_answer_to_question(
+            self._categories = self.get_multichoice_answers_to_question(
                 self._CATEGORIES_QUESTION_NAME)
-            self._categories = self._categories.split('|')
         return self._categories
 
     @property
