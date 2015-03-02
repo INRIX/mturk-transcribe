@@ -11,13 +11,9 @@ import parse_turk_results
 from parkme import models
 from parkme.ratecard import parser
 from parkme.ratecard import models as ratecard_models
+from parkme import settings
 from parkme.turk import assignments
 from parkme.turk import hits
-
-
-# AWS Credentials
-AWS_ACCESS_KEY_ID = 'AKIAJFLF5ZQRGKEN3WCQ'
-AWS_SECRET_ACCESS_KEY = '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'
 
 
 def parser_results_are_equal(results_a, results_b):
@@ -51,8 +47,8 @@ if __name__ == '__main__':
     assignment_to_results = {}
 
     mturk_connection = connection.MTurkConnection(
-       aws_access_key_id=AWS_ACCESS_KEY_ID,
-       aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+       aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
     assignment_gateway = assignments.AssignmentGateway.get(mturk_connection)
     all_assignments = assignment_gateway.get_by_batch_id(
         batch_id, assignments.RateTranscriptionAssignment)

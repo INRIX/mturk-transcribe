@@ -90,6 +90,45 @@ class BaseAssignment(object):
         return answers.fields[0] if answers and answers.fields else None
 
 
+class ImageCategorizationAssignment(BaseAssignment):
+    """Represents an image categorization assignment"""
+
+    _CATEGORIES_QUESTION_NAME = 'Answer'
+    _ASSET_ID_QUESTION_NAME = 'AssetID'
+
+    def __init__(self, assignment):
+        """Initialize assignment entity.
+
+        :param assignment: An assignment
+        :type assignment: boto.mturk.Assignment
+        """
+        super(ImageCategorizationAssignment, self).__init__(self, assignment)
+        self._categories = self._EMPTY
+        self._asset_id = self._EMPTY
+
+    @property
+    def categories(self):
+        """Return all the categories on this assignment.
+
+        :rtype: list or str or unicode
+        """
+        if self._categories is self._EMPTY:
+            import ipdb; ipdb.set_trace()
+            self._categories = []
+        return self._categories
+
+    @property
+    def asset_id(self):
+        """Return the asset id associated with this assignment.
+
+        :rtype: str or unicode
+        """
+        if self._asset_id is self._EMPTY:
+            self._asset_id = self.get_answer_to_question(
+                self._ASSET_ID_QUESTION_NAME)
+        return self._asset_id
+
+    
 class RateTranscriptionAssignment(BaseAssignment):
     """Represents a rate transcription assignment
     TODO: Break this out into a file for application-specific models
