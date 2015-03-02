@@ -105,7 +105,7 @@ class ImageCategorizationAssignment(BaseAssignment):
     """Represents an image categorization assignment"""
 
     _CATEGORIES_QUESTION_NAME = 'Answer'
-    _ASSET_ID_QUESTION_NAME = 'AssetID'
+    _ASSET_ID_QUESTION_NAME = 'AssetId'
 
     def __init__(self, assignment):
         """Initialize assignment entity.
