@@ -87,7 +87,7 @@ class BaseAssignment(object):
         :rtype: str or unicode or None
         """
         answers = get_answer_to_question(self.assignment, question_name)
-        return answers.fields[0] if answers.fields else None
+        return answers.fields[0] if answers and answers.fields else None
 
     def get_multichoice_answers_to_question(self, question_name):
         """Return a list containing all the answers to the question with the
@@ -98,7 +98,7 @@ class BaseAssignment(object):
         :rtype: list
         """
         answer = self.get_answer_to_question(question_name)
-        return answer.split('|')
+        return answer.split('|') if answer else None
 
 
 class ImageCategorizationAssignment(BaseAssignment):
@@ -246,7 +246,7 @@ class AssignmentGateway(object):
         """
         feedback = (
             "We're sorry, this HIT was not approved."
-            if feedback is self_DEFAULT
+            if feedback is self._DEFAULT
             else feedback)
         try:
             self.mturk_connection.reject_assignment(
