@@ -36,6 +36,8 @@ if __name__ == '__main__':
                 set(each.categories) == set(assignments[0].categories)
                 for each in assignments[1:]]):
             print "{} ACCEPTED".format(asset_id)
+            for each in assignments:
+                assignment_gateway.accept(each)
         else:
             print "{} REJECTED".format(asset_id)
-        print answers
+        print [each.categories for each in assignments]
