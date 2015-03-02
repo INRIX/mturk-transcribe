@@ -13,6 +13,8 @@ if __name__ == '__main__':
         print "Print out results of scanning validation results."
         exit(1)
 
+    batch_id = int(sys.argv[1])
+
     mturk_connection = connection.MTurkConnection(
        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)

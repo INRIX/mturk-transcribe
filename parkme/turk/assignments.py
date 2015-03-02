@@ -102,7 +102,7 @@ class ImageCategorizationAssignment(BaseAssignment):
         :param assignment: An assignment
         :type assignment: boto.mturk.Assignment
         """
-        super(ImageCategorizationAssignment, self).__init__(self, assignment)
+        super(ImageCategorizationAssignment, self).__init__(assignment)
         self._categories = self._EMPTY
         self._asset_id = self._EMPTY
 
