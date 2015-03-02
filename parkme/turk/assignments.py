@@ -86,7 +86,7 @@ class BaseAssignment(object):
         :type question_name: str or unicode
         :rtype: str or unicode or None
         """
-        answers = get_answer_to_question(question_name)
+        answers = get_answer_to_question(self.assignment, question_name)
         return answers.fields[0] if answers.fields else None
 
     def get_multichoice_answers_to_question(self, question_name):
