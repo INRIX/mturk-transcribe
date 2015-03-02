@@ -32,8 +32,10 @@ if __name__ == '__main__':
 
     # Check for any assignments where the answers do not match
     for asset_id, assignments in assignments_for_assets.iteritems():
-        answers = (set(each.categories) for each in assignments)
-        if len(answers) > 1:
-            print "{} REJECTED".format(asset_id)
-        else:
+        if all([
+                set(each.categories) == set(assignments[0].categories)
+                for each in assignments[1:]]):
             print "{} ACCEPTED".format(asset_id)
+        else:
+            print "{} REJECTED".format(asset_id)
+        print answers
