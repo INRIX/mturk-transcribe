@@ -1,6 +1,8 @@
 import sys
 sys.path.append('')
 
+import collections
+
 from boto.mturk import connection
 
 from parkme import settings
@@ -15,6 +17,8 @@ if __name__ == '__main__':
 
     batch_id = int(sys.argv[1])
 
+    assignments_for_assets = collections.defaultdict(list)
+
     mturk_connection = connection.MTurkConnection(
        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
@@ -22,6 +26,14 @@ if __name__ == '__main__':
     all_assignments = assignment_gateway.get_by_batch_id(
         batch_id, assignments.ImageCategorizationAssignment)
 
+    # Group all assignments by their referenced asset
     for each in all_assignments:
-        print each.asset_id
-        print each.categories
+        assignments_for_assets[each.asset_id].append(each)
+
+    # Check for any assignments where the answers do not match
+    for asset_id, assignments in assignments_for_assets.iteritems():
+        answers = (set(each.categories) for each in assignments)
+        if len(answers) > 1:
+            print "{} REJECTED".format(asset_id)
+        else:
+            print "{} ACCEPTED".format(asset_id)
