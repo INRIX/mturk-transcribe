@@ -98,7 +98,7 @@ class BaseAssignment(object):
         :rtype: list
         """
         answer = self.get_answer_to_question(question_name)
-        return answer.fields[0].split('|')
+        return answer.split('|')
 
 
 class ImageCategorizationAssignment(BaseAssignment):
