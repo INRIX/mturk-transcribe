@@ -39,13 +39,7 @@ def has_most_common_category(assignments):
     :type assignments: list
     :rtype: bool
     """
-    if len(assignments) < 2:
-        return False
-
-    results = collections.Counter([
-        '|'.join(each.categories) for each in assignments if each.categories])
-    most_common = results.most_common(2)
-    return len(most_common) == 1 or most_common[0][1] > most_common[1][1]
+    return bool(get_most_common_category(assignments))
 
 
 def get_most_common_category(assignments):
@@ -56,12 +50,14 @@ def get_most_common_category(assignments):
     :rtype: bool
     """
     if len(assignments) < 2:
-        return False
+        return []
 
-    results = collections.Counter([
-        '|'.join(each.categories) for each in assignments if each.categories])
-    most_common = results.most_common(1)
-    return most_common[0][0].split('|')
+    results = collections.Counter([])
+    for item in assignments:
+        if item.categories:
+            results.update(item.categories)
+
+    return [category for category, count in results.iteritems() if count >= 2]
 
 
 def set_categories_for_asset(asset_id, categories):
