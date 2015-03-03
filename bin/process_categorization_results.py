@@ -81,8 +81,8 @@ def set_categories_for_asset(asset_id, categories):
         INSERT INTO asset_lot_asset_type_xref
         (pk_asset_lot_asset_type_xref, pk_asset, pk_lot_asset_type,
         str_create_who, dt_create_date, str_modified_who, dt_modified_date)
-        VALUES (?, ?, ?, 'mturk', now(), 'mturk', now())
-        ''', str(uuid.uuid4()), asset_id, lot_asset_type_id)
+        VALUES (%s, %s, %s, 'mturk', now(), 'mturk', now())
+        ''', (str(uuid.uuid4()), asset_id, lot_asset_type_id))
 
 
 if __name__ == '__main__':
