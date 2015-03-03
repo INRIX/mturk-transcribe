@@ -114,7 +114,7 @@ if __name__ == '__main__':
             reject_empty_assignments(assignments, assignment_gateway)
 
             if has_most_common_category(assignments):
-                print '{} ACCEPTED'.format(assignments[0].hit_id)
+                print '{} ACCEPTED {}'.format(assignments[0].hit_id, asset_id)
                 winning_categories = get_most_common_category(assignments)
                 for each in assignments:
                     if each.categories:
@@ -137,6 +137,6 @@ if __name__ == '__main__':
     print "{} Accepted, {} Rejected ({:0.02f}%)".format(
         len(accepted_hits), len(rejected_hits), percent_accepted)
     print
-    print "REJECTED HIT IDS:"
+    print "REJECTED HIT IDS"
     for hit_id in rejected_hits:
         print hit_id
