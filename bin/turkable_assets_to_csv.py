@@ -23,6 +23,9 @@ def convert_row_to_csv_row(row):
 def get_most_recent_assets(assets):
     """Return only the most recent assets from the list of assets.
 
+    As per the specifications it should return only assets created within
+    roughly the same week as the newest asset.
+
     :param assets: A list of assets
     :type assets: list
     :rtype: list
