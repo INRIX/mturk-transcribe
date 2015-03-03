@@ -33,7 +33,7 @@ def get_most_recent_assets(assets):
     if not assets:
         return []
 
-    sorted_assets = sorted(assets, key=get_photo_timestamp, reversed=True)
+    sorted_assets = sorted(assets, key=get_photo_timestamp, reverse=True)
     newest_date = get_photo_timestamp(sorted_assets[0])
     one_week_before_newest = newest_date - datetime.timedelta(days=8)
 
@@ -72,7 +72,7 @@ if __name__ == '__main__':
     # Group assets by lot
     lots_to_assets = collections.defaultdict(list)
     for each in cur:
-        lots_to_assets[each[4]] = each
+        lots_to_assets[each[4]].append(each)
 
     # Find the most recent set of assets
     all_most_recent_assets = []
