@@ -83,6 +83,9 @@ def set_categories_for_asset(asset_id, categories):
         str_create_who, dt_create_date, str_modified_who, dt_modified_date)
         VALUES (%s, %s, %s, 'mturk', now(), 'mturk', now())
         ''', (str(uuid.uuid4()), asset_id, lot_asset_type_id))
+    conn.commit()
+    cur.close()
+    conn.close()
 
 
 if __name__ == '__main__':
@@ -123,7 +126,6 @@ if __name__ == '__main__':
                 set_categories_for_asset(asset_id, winning_categories)
             else:
                 print "{} REJECTED".format(assignments[0].hit_id)
-                print assignments[0].hit_id
                 rejected_hits.add(assignments[0].hit_id)
         else:
             print '{} NOT ENOUGH'.format(assignments[0].hit_id)
