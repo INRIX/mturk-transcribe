@@ -3,6 +3,7 @@ import sys
 sys.path.append('')
 
 import csv
+import datetime
 
 import psycopg2
 
@@ -37,8 +38,9 @@ if __name__ == '__main__':
     WHERE pk_asset_status=1
     AND (str_rates IS NULL OR str_rates='')
     AND pk_lot_status != 7
+    AND extract(year from dt_photo) < %s
     AND assetct.category_count=0;
-    ''')
+    ''', (datetime.datetime.utcnow().year,))
     output_field_names = ['image_url', 'asset_id']
 
     with open(sys.argv[1], 'wb+') as csvfile:
