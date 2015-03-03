@@ -120,6 +120,7 @@ if __name__ == '__main__':
                     if each.categories:
                         assignment_gateway.accept(each)
                 accepted_hits.add(assignments[0].hit_id)
+                set_categories_for_asset(asset_id, winning_categories)
             else:
                 print "{} REJECTED".format(assignments[0].hit_id)
                 print assignments[0].hit_id
