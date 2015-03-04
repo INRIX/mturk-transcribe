@@ -106,6 +106,7 @@ class ImageCategorizationAssignment(BaseAssignment):
 
     _CATEGORIES_QUESTION_NAME = 'Answer'
     _ASSET_ID_QUESTION_NAME = 'AssetId'
+    _LOT_ID_QUESTION_NAME = 'LotId'
 
     def __init__(self, assignment):
         """Initialize assignment entity.
@@ -116,6 +117,7 @@ class ImageCategorizationAssignment(BaseAssignment):
         super(ImageCategorizationAssignment, self).__init__(assignment)
         self._categories = self._EMPTY
         self._asset_id = self._EMPTY
+        self._lot_id = self._EMPTY
 
     @property
     def categories(self):
@@ -138,6 +140,17 @@ class ImageCategorizationAssignment(BaseAssignment):
             self._asset_id = self.get_answer_to_question(
                 self._ASSET_ID_QUESTION_NAME)
         return self._asset_id
+
+    @property
+    def lot_id(self):
+        """Return the lot id associated with this assignment.
+
+        :rtype: str or unicode
+        """
+        if self._lot_id is self._EMPTY:
+            self._lot_id = self.get_answer_to_question(
+                self._LOT_ID_QUESTION_NAME)
+        return self._lot_id
 
     
 class RateTranscriptionAssignment(BaseAssignment):

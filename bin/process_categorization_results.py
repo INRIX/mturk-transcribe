@@ -2,6 +2,7 @@ import sys
 sys.path.append('')
 
 import collections
+import contextlib
 import uuid
 
 from boto.mturk import connection
@@ -17,6 +18,22 @@ CATEGORY_TO_LOT_ASSET_TYPE = {
     'entrance': 2,
     'hours': 5
 }
+
+
+@contextlib.contextmanager
+def db_cursor():
+    """Simple context manager for creating a database cursor for user without
+    having to do the manual cleanup.
+
+    :rtype: psycopg2.Connection
+    """
+    db_connection = psycopg2.connect("dbname=pim user=pim")
+    cursor = db_connection.cursor()
+    yield cursor
+    cursor.commit()
+    cursor.close()
+    db_connection.close()
+
 
 def reject_empty_assignments(assignments, assignment_gateway):
     """Reject any assignments where the user did not choose an answer.
@@ -69,19 +86,71 @@ def set_categories_for_asset(asset_id, categories):
     :param categories: A list of categories
     :type categories: list
     """
-    conn = psycopg2.connect("dbname=pim user=pim")
-    cur = conn.cursor()
-    for each in categories:
-        lot_asset_type_id = CATEGORY_TO_LOT_ASSET_TYPE[each.lower()]
+    with db_cursor() as cur:
+        for category_name in categories:
+            lot_asset_type_id = CATEGORY_TO_LOT_ASSET_TYPE[
+                category_name.lower()]
+            cur.execute('''
+            INSERT INTO asset_lot_asset_type_xref
+            (pk_asset_lot_asset_type_xref, pk_asset, pk_lot_asset_type,
+            str_create_who, dt_create_date, str_modified_who, dt_modified_date)
+            VALUES (%s, %s, %s, 'mturk', now(), 'mturk', now())
+            ''', (str(uuid.uuid4()), asset_id, lot_asset_type_id))
+
+
+def mark_show_quality(pk_asset):
+    """Mark the given asset as show quality.
+
+    :param pk_asset: An asset id
+    :type pk_asset: str or unicode
+    """
+    with db_cursor() as cur:
+        cur.execute(
+            'UPDATE asset SET b_show_quality=true WHERE pk_asset=%s',
+            (pk_asset,))
+
+
+def unmark_show_quality(pk_asset):
+    """Unmark the given asset as show quality.
+
+    :param pk_asset: An asset id
+    :type pk_asset: str or unicode
+    """
+    with db_cursor() as cur:
+        cur.execute(
+            'UPDATE asset SET b_show_quality=false WHERE pk_asset=%s',
+            (pk_asset,))
+
+
+def adjust_show_quality_images_for_lot(lot_id):
+    """For the given lot ensure that it has one show quality image for each
+    category. If there's a tie simply choose the most recent image in the given
+    category.
+
+    :param lot_id: A lot id
+    :type lot_id: str or unicode
+    """
+    with db_cursor() as cur:
+        # Fetch all of the assets for the given lot
         cur.execute('''
-        INSERT INTO asset_lot_asset_type_xref
-        (pk_asset_lot_asset_type_xref, pk_asset, pk_lot_asset_type,
-        str_create_who, dt_create_date, str_modified_who, dt_modified_date)
-        VALUES (%s, %s, %s, 'mturk', now(), 'mturk', now())
-        ''', (str(uuid.uuid4()), asset_id, lot_asset_type_id))
-    conn.commit()
-    cur.close()
-    conn.close()
+        SELECT pk_asset, pk_lot_asset_type, dt_photo
+        FROM asset LEFT OUTER JOIN asset_lot_asset_type_xref USING (pk_asset)
+        WHERE pk_lot_asset_type IS NOT NULL AND pk_lot=%s;
+        ''', (lot_id,))
+        # Sort assets by category
+        category_to_assets = collections.defaultdict(list)
+        for asset in cur:
+            category_to_assets[asset[1]].append(asset)
+        # For each category
+        already_marked_asset_ids = set([])
+        for _, assets in category_to_assets.iteritems():
+            # Find all assets that haven't been marked in another category
+            sorted_assets = sorted(assets, key=lambda x: x[2], reverse=True)
+            mark_show_quality(sorted_assets[0][0])
+            already_marked_asset_ids.add(sorted_assets[0][0])
+            for asset in sorted_assets:
+                if asset[0] not in already_marked_asset_ids:
+                    unmark_show_quality(asset[0])
 
 
 if __name__ == '__main__':
@@ -95,6 +164,7 @@ if __name__ == '__main__':
     assignments_for_assets = collections.defaultdict(list)
     accepted_hits = set([])
     rejected_hits = set([])
+    lot_ids = set([])
 
     mturk_connection = connection.MTurkConnection(
        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -103,9 +173,10 @@ if __name__ == '__main__':
     all_assignments = assignment_gateway.get_by_batch_id(
         batch_id, assignments.ImageCategorizationAssignment)
 
-    # Group all assignments by their referenced asset
+    # Group all assignments by their referenced asset, accumulate lot ids
     for each in all_assignments:
         assignments_for_assets[each.asset_id].append(each)
+        lot_ids.add(each.lot_id)
 
     # Check for any assignments where the answers do not match
     for asset_id, assignments in assignments_for_assets.iteritems():
