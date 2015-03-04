@@ -16,8 +16,8 @@ def convert_row_to_csv_row(row):
     :type row: tuple
     :rtype: tuple
     """
-    # Format is image_url, asset_id
-    return 'http://{}/{}'.format(row[1], row[2]), row[0]
+    # Format is image_url, asset_id, lot_id
+    return 'http://{}/{}'.format(row[1], row[2]), row[0], row[4]
 
 
 def get_most_recent_assets(assets):
@@ -70,7 +70,7 @@ if __name__ == '__main__':
     AND extract(year from dt_photo) < %s
     AND assetct.category_count=0;
     ''', (datetime.datetime.utcnow().year,))
-    output_field_names = ['image_url', 'asset_id']
+    output_field_names = ['image_url', 'asset_id', 'lot_id']
 
     # Group assets by lot
     lots_to_assets = collections.defaultdict(list)

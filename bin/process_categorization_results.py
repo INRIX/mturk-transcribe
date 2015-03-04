@@ -31,7 +31,7 @@ def reject_empty_assignments(assignments, assignment_gateway):
                 each, feedback='Did not select any options')
 
 
-def has_most_common_category(assignments):
+def has_consensus_on_categories(assignments):
     """Indicates whether or not there is a most common category in the given
     list of assignments.
 
@@ -39,10 +39,10 @@ def has_most_common_category(assignments):
     :type assignments: list
     :rtype: bool
     """
-    return bool(get_most_common_category(assignments))
+    return bool(get_consensus_categories(assignments))
 
 
-def get_most_common_category(assignments):
+def get_consensus_categories(assignments):
     """Return the most common category.
 
     :param assignments: a list of assignments
@@ -112,9 +112,9 @@ if __name__ == '__main__':
         if len(assignments) >= 3:
             reject_empty_assignments(assignments, assignment_gateway)
 
-            if has_most_common_category(assignments):
+            if has_consensus_on_categories(assignments):
                 print '{} ACCEPTED {}'.format(assignments[0].hit_id, asset_id)
-                winning_categories = get_most_common_category(assignments)
+                winning_categories = get_consensus_categories(assignments)
                 for each in assignments:
                     if each.categories:
                         assignment_gateway.accept(each)
