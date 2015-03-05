@@ -38,6 +38,19 @@ def reject_empty_assignments(assignments, assignment_gateway):
                 each, feedback='Did not select any options')
 
 
+def majority_considered_uncategorizable(assignments):
+    """Indicates whether or not the majority of Mechanical Turk workers marked
+    this assignment as not matching any categories or not.
+
+    :param assignments: A list of assignments
+    :type assignments: list of ImageCategorizationAssignment
+    :rtype: bool
+    """
+    num_marked_does_not_match = len([
+        each for each in assignments if each.does_not_match])
+    return (num_marked_does_not_match + 1) >= len(assignments)
+
+
 def has_consensus_on_categories(assignments):
     """Indicates whether or not there is a most common category in the given
     list of assignments.
@@ -216,9 +229,12 @@ if __name__ == '__main__':
                 accepted_hits.add(assignments[0].hit_id)
                 set_categories_for_asset(asset_id, winning_categories)
                 mark_approved(asset_id)
-            elif marked_uncategorizable(assignments):
-                # This assignment can't be categorized
-                pass
+            elif majority_considered_uncategorizable(assignments):
+                # Accept all of the assignments (but don't keep categories)
+                for each in assignments:
+                    assignment_gateway.accept(each)
+                # Mark the asset as approved
+                mark_approved(asset_id)
             else:
                 print "{} REJECTED".format(assignments[0].hit_id)
                 rejected_hits.add(assignments[0].hit_id)
