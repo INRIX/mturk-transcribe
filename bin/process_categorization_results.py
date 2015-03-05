@@ -2,23 +2,21 @@ import sys
 sys.path.append('')
 
 import collections
-import contextlib
 import copy
 import uuid
 
 from boto.mturk import connection
-import psycopg2
 
 from parkme import db
 from parkme import settings
-from parkme.turk import assignments
+from parkme.turk import assignments as turk_assignments
 
 
 # Constants taken from ParkMe app.
 CATEGORY_TO_LOT_ASSET_TYPE = {
     'rates': 4,
     'entrance': 2,
-    'hours': 5
+    'hours': 5,
     'operator': 11,
     'phone': 8,
     'paymenttypes': 16
@@ -204,11 +202,12 @@ if __name__ == '__main__':
     lot_ids = set([])
 
     mturk_connection = connection.MTurkConnection(
-       aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-       aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    assignment_gateway = assignments.AssignmentGateway.get(mturk_connection)
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+    assignment_gateway = turk_assignments.AssignmentGateway.get(
+        mturk_connection)
     all_assignments = assignment_gateway.get_by_batch_id(
-        batch_id, assignments.ImageCategorizationAssignment)
+        batch_id, turk_assignments.ImageCategorizationAssignment)
 
     # Group all assignments by their referenced asset, accumulate lot ids
     for each in all_assignments:
