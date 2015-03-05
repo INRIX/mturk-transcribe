@@ -3,6 +3,7 @@ sys.path.append('')
 
 import collections
 import contextlib
+import copy
 import uuid
 
 from boto.mturk import connection
@@ -116,7 +117,7 @@ def mark_approved(pk_asset):
     """
     with db.cursor() as cur:
         cur.execute(
-            'UPDATE asset SET pk_asset_type=2 WHERE pk_asset=%s',
+            'UPDATE asset SET pk_asset_status=2 WHERE pk_asset=%s',
             (pk_asset,))
 
 
@@ -145,7 +146,7 @@ def adjust_show_quality_images_for_lot(lot_id):
             # Sorted to find the newest assets
             sorted_assets = sorted(assets, key=lambda x: x[2], reverse=True)
             sorted_asset_ids = [asset[0] for asset in sorted_assets]
-            filtered_sorted_asset_ids = sorted_asset_ids.copy()
+            filtered_sorted_asset_ids = copy.copy(sorted_asset_ids)
             # Remove all already marked assets from sorted asset ids
             for next_asset_id in already_marked_asset_ids:
                 filtered_sorted_asset_ids.remove(next_asset_id)
