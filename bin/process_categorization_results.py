@@ -163,7 +163,11 @@ def adjust_show_quality_images_for_lot(lot_id):
             filtered_sorted_asset_ids = copy.copy(sorted_asset_ids)
             # Remove all already marked assets from sorted asset ids
             for next_asset_id in already_marked_asset_ids:
-                filtered_sorted_asset_ids.remove(next_asset_id)
+                try:
+                    filtered_sorted_asset_ids.remove(next_asset_id)
+                except ValueError:
+                    # Item is not in list
+                    pass
             # If there's only one asset, all assets are previously marked
             asset_id_to_mark = None
             asset_ids_to_unmark = []
