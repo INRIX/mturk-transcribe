@@ -107,6 +107,7 @@ class ImageCategorizationAssignment(BaseAssignment):
     _CATEGORIES_QUESTION_NAME = 'Answer'
     _ASSET_ID_QUESTION_NAME = 'AssetId'
     _LOT_ID_QUESTION_NAME = 'LotId'
+    _DOES_NOT_MATCH_QUESTION_NAME = 'DoesNotMatch'
 
     def __init__(self, assignment):
         """Initialize assignment entity.
@@ -118,6 +119,7 @@ class ImageCategorizationAssignment(BaseAssignment):
         self._categories = self._EMPTY
         self._asset_id = self._EMPTY
         self._lot_id = self._EMPTY
+        self._does_not_match = self._EMPTY
 
     @property
     def categories(self):
@@ -151,6 +153,18 @@ class ImageCategorizationAssignment(BaseAssignment):
             self._lot_id = self.get_answer_to_question(
                 self._LOT_ID_QUESTION_NAME)
         return self._lot_id
+
+    @property
+    def does_not_match(self):
+        """Indicates whether or not this assignment does not match available
+        categories.
+
+        :rtype: bool
+        """
+        if self._does_not_match is self._EMPTY:
+            self._does_not_match = bool(self.get_answer_to_question(
+                self._DOES_NOT_MATCH_QUESTION_NAME))
+        return self._does_not_match
 
     
 class RateTranscriptionAssignment(BaseAssignment):

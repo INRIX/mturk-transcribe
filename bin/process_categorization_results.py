@@ -19,6 +19,9 @@ CATEGORY_TO_LOT_ASSET_TYPE = {
     'rates': 4,
     'entrance': 2,
     'hours': 5
+    'operator': 11,
+    'phone': 8,
+    'paymenttypes': 16
 }
 
 
@@ -213,6 +216,9 @@ if __name__ == '__main__':
                 accepted_hits.add(assignments[0].hit_id)
                 set_categories_for_asset(asset_id, winning_categories)
                 mark_approved(asset_id)
+            elif marked_uncategorizable(assignments):
+                # This assignment can't be categorized
+                pass
             else:
                 print "{} REJECTED".format(assignments[0].hit_id)
                 rejected_hits.add(assignments[0].hit_id)
