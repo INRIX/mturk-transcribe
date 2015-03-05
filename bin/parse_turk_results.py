@@ -1,6 +1,8 @@
+import sys
+sys.path.append('')
+
 import csv
 import contextlib
-import sys
 
 import termcolor
 
