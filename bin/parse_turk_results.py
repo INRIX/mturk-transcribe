@@ -108,7 +108,7 @@ if __name__ == '__main__':
 
     output_rows = []
     for answer in turk_answers_from_file(csv_file):
-        results, rejected = parse_or_reject_answers(answer['Answer.Rates'])
+        results, notes, rejected = parse_or_reject_answers(answer['Answer.Rates'])
         print_rate_results(
             answer['HITId'],
             answer['WorkerId'],
