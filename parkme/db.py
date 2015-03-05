@@ -24,6 +24,6 @@ def cursor(connection_params=None):
     db_connection = psycopg2.connect(connection_params)
     db_cursor = db_connection.cursor()
     yield db_cursor
-    db_cursor.commit()
+    db_connection.commit()
     db_cursor.close()
     db_connection.close()

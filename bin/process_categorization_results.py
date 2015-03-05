@@ -108,6 +108,18 @@ def unmark_show_quality(pk_asset):
             (pk_asset,))
 
 
+def mark_approved(pk_asset):
+    """Mark the given asset as approved.
+
+    :param pk_asset: An asset id
+    :type pk_asset: str or unicode
+    """
+    with db.cursor() as cur:
+        cur.execute(
+            'UPDATE asset SET pk_asset_type=2 WHERE pk_asset=%s',
+            (pk_asset,))
+
+
 def adjust_show_quality_images_for_lot(lot_id):
     """For the given lot ensure that it has one show quality image for each
     category. If there's a tie simply choose the most recent image in the given
@@ -199,6 +211,7 @@ if __name__ == '__main__':
                         assignment_gateway.accept(each)
                 accepted_hits.add(assignments[0].hit_id)
                 set_categories_for_asset(asset_id, winning_categories)
+                mark_approved(asset_id)
             else:
                 print "{} REJECTED".format(assignments[0].hit_id)
                 rejected_hits.add(assignments[0].hit_id)
