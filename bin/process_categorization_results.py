@@ -8,6 +8,7 @@ import uuid
 from boto.mturk import connection
 import psycopg2
 
+from parkme import db
 from parkme import settings
 from parkme.turk import assignments
 
@@ -18,21 +19,6 @@ CATEGORY_TO_LOT_ASSET_TYPE = {
     'entrance': 2,
     'hours': 5
 }
-
-
-@contextlib.contextmanager
-def db_cursor():
-    """Simple context manager for creating a database cursor for user without
-    having to do the manual cleanup.
-
-    :rtype: psycopg2.Connection
-    """
-    db_connection = psycopg2.connect("dbname=pim user=pim")
-    cursor = db_connection.cursor()
-    yield cursor
-    cursor.commit()
-    cursor.close()
-    db_connection.close()
 
 
 def reject_empty_assignments(assignments, assignment_gateway):
@@ -86,7 +72,7 @@ def set_categories_for_asset(asset_id, categories):
     :param categories: A list of categories
     :type categories: list
     """
-    with db_cursor() as cur:
+    with db.cursor() as cur:
         for category_name in categories:
             lot_asset_type_id = CATEGORY_TO_LOT_ASSET_TYPE[
                 category_name.lower()]
@@ -104,7 +90,7 @@ def mark_show_quality(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db_cursor() as cur:
+    with db.cursor() as cur:
         cur.execute(
             'UPDATE asset SET b_show_quality=true WHERE pk_asset=%s',
             (pk_asset,))
@@ -116,7 +102,7 @@ def unmark_show_quality(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db_cursor() as cur:
+    with db.cursor() as cur:
         cur.execute(
             'UPDATE asset SET b_show_quality=false WHERE pk_asset=%s',
             (pk_asset,))
@@ -130,7 +116,7 @@ def adjust_show_quality_images_for_lot(lot_id):
     :param lot_id: A lot id
     :type lot_id: str or unicode
     """
-    with db_cursor() as cur:
+    with db.cursor() as cur:
         # Fetch all of the assets for the given lot
         cur.execute('''
         SELECT pk_asset, pk_lot_asset_type, dt_photo
@@ -144,13 +130,35 @@ def adjust_show_quality_images_for_lot(lot_id):
         # For each category
         already_marked_asset_ids = set([])
         for _, assets in category_to_assets.iteritems():
-            # Find all assets that haven't been marked in another category
+            # Sorted to find the newest assets
             sorted_assets = sorted(assets, key=lambda x: x[2], reverse=True)
-            mark_show_quality(sorted_assets[0][0])
-            already_marked_asset_ids.add(sorted_assets[0][0])
-            for asset in sorted_assets:
-                if asset[0] not in already_marked_asset_ids:
-                    unmark_show_quality(asset[0])
+            sorted_asset_ids = [asset[0] for asset in sorted_assets]
+            filtered_sorted_asset_ids = sorted_asset_ids.copy()
+            # Remove all already marked assets from sorted asset ids
+            for next_asset_id in already_marked_asset_ids:
+                filtered_sorted_asset_ids.remove(next_asset_id)
+            # If there's only one asset, all assets are previously marked
+            asset_id_to_mark = None
+            asset_ids_to_unmark = []
+            # If we have a case where we should just use the newest asset
+            # These cases are:
+            #   - There's only a single asset for this category
+            #   - All assets have already been marked previously
+            #   - The first asset hasn't been marked yet
+            if (len(sorted_asset_ids) == 1 or
+                    not filtered_sorted_asset_ids or
+                    sorted_asset_ids[0] not in already_marked_asset_ids):
+                asset_id_to_mark = sorted_asset_ids[0]
+                asset_ids_to_unmark = sorted_asset_ids[1:]
+            else:
+                # Otherwise mark the newest filtered asset
+                asset_id_to_mark = filtered_sorted_asset_ids[0]
+                asset_ids_to_unmark = filtered_sorted_asset_ids[1:]
+            mark_show_quality(asset_id_to_mark)
+            already_marked_asset_ids.add(asset_id_to_mark)
+            for next_asset_id in asset_ids_to_unmark:
+                if next_asset_id not in already_marked_asset_ids:
+                    unmark_show_quality(next_asset_id)
 
 
 if __name__ == '__main__':
@@ -197,6 +205,12 @@ if __name__ == '__main__':
         else:
             print '{} NOT ENOUGH'.format(assignments[0].hit_id)
         print [each.categories for each in assignments]
+
+    # Adjust show quality images based on classification results
+    print "Adjusting show quality images..."
+    for lot_id in lot_ids:
+        print lot_id
+        adjust_show_quality_images_for_lot(lot_id)
 
     percent_accepted = (
         float(len(accepted_hits)) / len(assignments_for_assets.keys())
