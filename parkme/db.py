@@ -23,7 +23,7 @@ def cursor(connection_params=None):
         connection_params if connection_params else "dbname=pim user=pim")
     db_connection = psycopg2.connect(connection_params)
     db_cursor = db_connection.cursor()
-    yield db_cursor, conn
+    yield db_cursor, db_connection
     db_connection.commit()
     db_cursor.close()
     db_connection.close()
