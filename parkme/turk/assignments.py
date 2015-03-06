@@ -277,7 +277,7 @@ class AssignmentGateway(object):
         try:
             self.mturk_connection.approve_rejected_assignment(
                 assignment.assignment_id, feedback=feedback)
-        except connection.MTurkRequestError as mtr:
+        except connection.MTurkRequestError as mtre:
             if mtre.status != 200:
                 raise mtre
 

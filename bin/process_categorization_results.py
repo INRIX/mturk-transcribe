@@ -229,7 +229,6 @@ if __name__ == '__main__':
         if len(assignments) >= 3:
             if has_consensus_on_categories(assignments):
                 print '{} ACCEPTED {}'.format(assignments[0].hit_id, asset_id)
-                reject_empty_assignments(assignments, assignment_gateway)
                 winning_categories = get_consensus_categories(assignments)
                 for each in assignments:
                     if each.categories:
@@ -244,7 +243,10 @@ if __name__ == '__main__':
                 # Mark the asset as approved
                 mark_approved(asset_id)
             else:
+                # No consensus could be reached
                 print "{} REJECTED".format(assignments[0].hit_id)
+                for each in assignments:
+                    assignment_gateway.accept(each)
                 rejected_hits.add(assignments[0].hit_id)
         else:
             print '{} NOT ENOUGH'.format(assignments[0].hit_id)
