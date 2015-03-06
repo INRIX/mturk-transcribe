@@ -6,6 +6,7 @@ import copy
 import uuid
 
 from boto.mturk import connection
+import psycopg2
 
 from parkme import db
 from parkme import settings
@@ -87,16 +88,20 @@ def set_categories_for_asset(asset_id, categories):
     :param categories: A list of categories
     :type categories: list
     """
-    with db.cursor() as cur:
+    with db.cursor() as cur, conn:
         for category_name in categories:
             lot_asset_type_id = CATEGORY_TO_LOT_ASSET_TYPE[
                 category_name.lower()]
-            cur.execute('''
-            INSERT INTO asset_lot_asset_type_xref
-            (pk_asset_lot_asset_type_xref, pk_asset, pk_lot_asset_type,
-            str_create_who, dt_create_date, str_modified_who, dt_modified_date)
-            VALUES (%s, %s, %s, 'mturk', now(), 'mturk', now())
-            ''', (str(uuid.uuid4()), asset_id, lot_asset_type_id))
+            try:
+                cur.execute('''
+                INSERT INTO asset_lot_asset_type_xref
+                (pk_asset_lot_asset_type_xref, pk_asset, pk_lot_asset_type,
+                str_create_who, dt_create_date, str_modified_who, dt_modified_date)
+                VALUES (%s, %s, %s, 'mturk', now(), 'mturk', now())
+                ''', (str(uuid.uuid4()), asset_id, lot_asset_type_id))
+                conn.commit()
+            except psycopg2.IntegrityError:
+                continue
 
 
 def mark_show_quality(pk_asset):
@@ -105,7 +110,7 @@ def mark_show_quality(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db.cursor() as cur:
+    with db.cursor() as cur, _:
         cur.execute(
             'UPDATE asset SET b_show_quality=true WHERE pk_asset=%s',
             (pk_asset,))
@@ -117,7 +122,7 @@ def unmark_show_quality(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db.cursor() as cur:
+    with db.cursor() as cur, _:
         cur.execute(
             'UPDATE asset SET b_show_quality=false WHERE pk_asset=%s',
             (pk_asset,))
@@ -129,7 +134,7 @@ def mark_approved(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db.cursor() as cur:
+    with db.cursor() as cur, _:
         cur.execute(
             'UPDATE asset SET pk_asset_status=2 WHERE pk_asset=%s',
             (pk_asset,))
@@ -143,7 +148,7 @@ def adjust_show_quality_images_for_lot(lot_id):
     :param lot_id: A lot id
     :type lot_id: str or unicode
     """
-    with db.cursor() as cur:
+    with db.cursor() as cur, _:
         # Fetch all of the assets for the given lot
         cur.execute('''
         SELECT pk_asset, pk_lot_asset_type, dt_photo
@@ -221,10 +226,9 @@ if __name__ == '__main__':
     # Check for any assignments where the answers do not match
     for asset_id, assignments in assignments_for_assets.iteritems():
         if len(assignments) >= 3:
-            reject_empty_assignments(assignments, assignment_gateway)
-
             if has_consensus_on_categories(assignments):
                 print '{} ACCEPTED {}'.format(assignments[0].hit_id, asset_id)
+                reject_empty_assignments(assignments, assignment_gateway)
                 winning_categories = get_consensus_categories(assignments)
                 for each in assignments:
                     if each.categories:
@@ -240,6 +244,7 @@ if __name__ == '__main__':
                 mark_approved(asset_id)
             else:
                 print "{} REJECTED".format(assignments[0].hit_id)
+                reject_empty_assignments(assignments, assignment_gateway)
                 rejected_hits.add(assignments[0].hit_id)
         else:
             print '{} NOT ENOUGH'.format(assignments[0].hit_id)
