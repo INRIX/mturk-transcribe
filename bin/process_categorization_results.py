@@ -31,7 +31,7 @@ def reject_empty_assignments(assignments, assignment_gateway):
     :type assignments: list
     """
     for each in assignments:
-        if each.categories is None:
+        if each.categories is None and each.does_not_match is None:
             print '--> {} REJECTED AS EMPTY <--'.format(each.assignment_id)
             assignment_gateway.reject(
                 each, feedback='Did not select any options')
@@ -245,7 +245,6 @@ if __name__ == '__main__':
                 mark_approved(asset_id)
             else:
                 print "{} REJECTED".format(assignments[0].hit_id)
-                reject_empty_assignments(assignments, assignment_gateway)
                 rejected_hits.add(assignments[0].hit_id)
         else:
             print '{} NOT ENOUGH'.format(assignments[0].hit_id)

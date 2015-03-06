@@ -262,6 +262,25 @@ class AssignmentGateway(object):
             if mtre.status != 200:
                 raise mtre
 
+    def accept_rejected(self, assignment, feedback=_DEFAULT):
+        """Approve an assignment that was previously rejected.
+
+        :param assignment: An assignment
+        :type assignment: Assignment
+        :param feedback: The feedback
+        :type feedback: str or unicode or _DEFAULT
+        """
+        feedback = (
+            "We have reviewed and approved this hit. We apologize for any inconvenience."
+            if feedback is self._DEFAULT
+            else feedback)
+        try:
+            self.mturk_connection.approve_rejected_assignment(
+                assignment.assignment_id, feedback=feedback)
+        except connection.MTurkRequestError as mtr:
+            if mtre.status != 200:
+                raise mtre
+
     def reject(self, assignment, feedback=_DEFAULT):
         """Reject the given assignment. Ignores exception thrown when
         assignment has already been rejected.
