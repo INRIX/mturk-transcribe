@@ -88,7 +88,7 @@ def set_categories_for_asset(asset_id, categories):
     :param categories: A list of categories
     :type categories: list
     """
-    with db.cursor() as cur, conn:
+    with db.cursor() as (cur, conn):
         for category_name in categories:
             lot_asset_type_id = CATEGORY_TO_LOT_ASSET_TYPE[
                 category_name.lower()]
@@ -101,6 +101,7 @@ def set_categories_for_asset(asset_id, categories):
                 ''', (str(uuid.uuid4()), asset_id, lot_asset_type_id))
                 conn.commit()
             except psycopg2.IntegrityError:
+                conn.rollback()
                 continue
 
 
@@ -110,7 +111,7 @@ def mark_show_quality(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db.cursor() as cur, _:
+    with db.cursor() as (cur, _):
         cur.execute(
             'UPDATE asset SET b_show_quality=true WHERE pk_asset=%s',
             (pk_asset,))
@@ -122,7 +123,7 @@ def unmark_show_quality(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db.cursor() as cur, _:
+    with db.cursor() as (cur, _):
         cur.execute(
             'UPDATE asset SET b_show_quality=false WHERE pk_asset=%s',
             (pk_asset,))
@@ -134,7 +135,7 @@ def mark_approved(pk_asset):
     :param pk_asset: An asset id
     :type pk_asset: str or unicode
     """
-    with db.cursor() as cur, _:
+    with db.cursor() as (cur, _):
         cur.execute(
             'UPDATE asset SET pk_asset_status=2 WHERE pk_asset=%s',
             (pk_asset,))
@@ -148,7 +149,7 @@ def adjust_show_quality_images_for_lot(lot_id):
     :param lot_id: A lot id
     :type lot_id: str or unicode
     """
-    with db.cursor() as cur, _:
+    with db.cursor() as (cur, _):
         # Fetch all of the assets for the given lot
         cur.execute('''
         SELECT pk_asset, pk_lot_asset_type, dt_photo
