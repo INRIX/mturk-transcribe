@@ -44,6 +44,7 @@ if __name__ == '__main__':
 
     rejected_hits = collections.defaultdict(list)
     accepted_hits = collections.defaultdict(list)
+    assets_without_rates = set([])
     assignment_to_results = {}
 
     mturk_connection = connection.MTurkConnection(
@@ -55,6 +56,8 @@ if __name__ == '__main__':
 
     for each in all_assignments:
         if not each.rates:
+            if each.does_not_contain_rates:
+                assets_without_rates.add(each.asset_id)
             continue
 
         try:

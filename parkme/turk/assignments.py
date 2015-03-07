@@ -174,6 +174,8 @@ class RateTranscriptionAssignment(BaseAssignment):
     
     _RATES_QUESTION_NAME = 'Rates'
     _LOTID_QUESTION_NAME = 'LotId'
+    _ASSET_ID_QUESTION_NAME = 'AssetId'
+    _NOT_RATES_QUESTION_NAME = 'NotRates'
 
     def __init__(self, assignment):
         """Initialize assignment entity.
@@ -184,6 +186,8 @@ class RateTranscriptionAssignment(BaseAssignment):
         super(RateTranscriptionAssignment, self).__init__(assignment)
         self._rates = self._EMPTY
         self._lot_id = self._EMPTY
+        self._asset_id = self._EMPTY
+        self._does_not_contain_rates = self._EMPTY
 
     @property
     def rates(self):
@@ -207,6 +211,29 @@ class RateTranscriptionAssignment(BaseAssignment):
             self._lot_id = self.get_answer_to_question(
                 self._LOTID_QUESTION_NAME)
         return self._lot_id
+
+    @property
+    def asset_id(self):
+        """Return the asset id associated with this assignment.
+
+        :rtype: str or unicode or None
+        """
+        if self._asset_id is self._EMPTY:
+            self._asset_id = self.get_answer_to_question(
+                self._ASSET_ID_QUESTION_NAME)
+        return self._asset_id
+
+    @property
+    def does_not_contain_rates(self):
+        """Indicates whether or not 'Image Does Not Contain Rates' checkbox
+        selected.
+
+        :rtype: bool
+        """
+        if self._does_not_contain_rates is self._EMPTY:
+            self._does_not_contain_rates = bool(self.get_answer_to_question(
+                self._NOT_RATES_QUESTION_NAME))
+        return self._does_not_contain_rates
     
 
 class AssignmentGateway(object):

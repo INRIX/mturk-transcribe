@@ -14,7 +14,7 @@ def convert_row_to_csv_row(asset):
     :type asset: tuple
     :rtype: tuple
     """
-    return asset[1], 'http://{}/{}'.format(asset[2], asset[3])
+    return asset[0], asset[1], 'http://{}/{}'.format(asset[2], asset[3])
 
 
 if __name__ == '__main__':
@@ -33,7 +33,7 @@ if __name__ == '__main__':
         WHERE (str_rates IS NULL OR str_rates='') AND pk_lot_status != 7
         ''')
 
-        output_field_names = ['lot_id', 'image_url']
+        output_field_names = ['asset_id', 'lot_id', 'image_url']
 
         with open(sys.argv[1], 'wb+') as csvfile:
             csvwriter = csv.writer(csvfile)
