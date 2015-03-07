@@ -81,6 +81,10 @@ if __name__ == '__main__':
             manual_review_gateway.save(manual_review)
         print termcolor.colored('REJECTED {}'.format(hit_id), 'red')
 
+    print 'ASSETS NOT CONTAINING RATES'
+    for asset_id in assets_without_rates:
+        print asset_id
+
     for hit_id, assignments in accepted_hits.iteritems():
         if len(assignments) == 2:
             if not parser_results_are_equal(
