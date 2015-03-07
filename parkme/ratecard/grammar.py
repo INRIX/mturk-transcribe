@@ -185,7 +185,7 @@ each_n = pyparsing.Combine(
     adjacent=False)
 early_bird = pyparsing.Regex(r'(E|e)arly\s+(B|b)ird')
 weekend = (
-    pyparsing.Regex(r'(W|w)eekend(s)?\s*(rate)?.*').setParseAction(
+    pyparsing.Regex(r'(W|w)eekend(s)?\s*(rate)?.*=').setParseAction(
         pyparsing.replaceWith('Sat-Sun'))
     + pyparsing.Optional(parenthetical_form))
 flat_duration = (
@@ -206,6 +206,6 @@ rate_types = [
 ]
 rate_card_form = (
     pyparsing.Or(rate_types).setParseAction(final_join) +
-    pyparsing.Optional(pyparsing.Or([pyparsing.Word("::"), pyparsing.Word("-")])).suppress() +
+    pyparsing.Optional(pyparsing.Or([pyparsing.Word("="), pyparsing.Word("-")])).suppress() +
     price_form)
 rate_card = pyparsing.Or([rate_card_form, notes])
