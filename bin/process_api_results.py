@@ -86,7 +86,7 @@ if __name__ == '__main__':
         print asset_id
 
     for hit_id, assignments in accepted_hits.iteritems():
-        if len(assignments) == 2:
+        if len(assignments) == 3:
             if not parser_results_are_equal(
                     assignment_to_results[assignments[0]].parsed_rates,
                     assignment_to_results[assignments[1]].parsed_rates):
