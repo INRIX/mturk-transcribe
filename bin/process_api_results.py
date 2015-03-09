@@ -148,7 +148,8 @@ if __name__ == '__main__':
     num_hits_with_rates = len(hit_ids) - len(assets_without_rates)
     print
     print 'FINAL RESULTS'
-    print '{} Accepted, {} Total ({:0.02f}%)'.format(
+    print '{} Accepted, {} Total, {} Not Rates ({:0.02f}%)'.format(
         len(accepted_hit_ids),
         num_hits_with_rates,
+        len(assets_without_rates),
         (len(accepted_hit_ids) / float(num_hits_with_rates)) * 100.0)
