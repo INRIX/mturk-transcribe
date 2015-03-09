@@ -39,6 +39,7 @@ def has_consensus_on_rates(assignments):
 
         try:
             result = ratecard_models.ParseResult.get_for_assignment(each)
+            # Has results and exactly one result per line
             if result and len(result.rates) == len(each.rates.split('\r\n')):
                 parsed_assignments.append(result)
         except ratecard_models.ParseFailedException:
@@ -52,6 +53,36 @@ def has_consensus_on_rates(assignments):
         if set(lhs.parsed_rates) == set(rhs.parsed_rates):
             num_matches += 2
     return num_matches >= 2
+
+
+def get_consensus_rates(assignments):
+    """Parse and return the consensus results for the given assignments.
+
+    :param assignments: A list of assignments
+    :type assignments: list
+    :rtype: parkme.ratecard.models.ParseResult
+    """
+    parsed_assignments = []
+    for each in assignments:
+        if not each.rates:
+            continue
+
+        try:
+            result = ratecard_models.ParseResult.get_for_assignment(each)
+            # Has results and exactly one result per line
+            if result and len(result.rates) == len(each.rates.split('\r\n')):
+                parsed_assignments.append(result)
+        except ratecard_models.ParseFailedException:
+            continue
+
+    if len(parsed_assignments) < 2:
+        return None
+
+    for (lhs, rhs) in itertools.combinations(parsed_assignments, 2):
+        if set(lhs.parsed_rates) == set(rhs.parsed_rates):
+            return lhs.parsed_rates
+
+    return None
 
 
 if __name__ == '__main__':
@@ -102,3 +133,9 @@ if __name__ == '__main__':
         len(hit_ids_without_consensus))
     print 'Effectiveness: {:0.02f}%'.format(
         len(hit_ids_with_consensus) / float(num_hits_with_rates) * 100.0)
+
+    print
+    print 'CONSENSUS HIT IDS'
+    for hit_id in hit_ids_with_consensus:
+        print hit_id
+        print get_consensus_rates(hit_id_to_assignments[hit_id])
