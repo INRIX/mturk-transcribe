@@ -34,9 +34,13 @@ def has_consensus_on_rates(assignments):
     """
     parsed_assignments = []
     for each in assignments:
+        if not each.rates:
+            continue
+
         try:
             result = ratecard_models.ParseResult.get_for_assignment(each)
-            parsed_assignments.append(result)
+            if result:
+                parsed_assignments.append(result)
         except ratecard_models.ParseFailedException:
             continue
 
