@@ -40,7 +40,7 @@ def has_consensus_on_parser_results(results):
     num_matches = 0
     for (lhs, rhs) in itertools.combinations(results, 2):
         if set(lhs.parsed_rates) == set(rhs.parsed_rates):
-            num_matches += 1
+            num_matches += 2
     return num_matches >= 2
 
 
