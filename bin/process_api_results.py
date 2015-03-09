@@ -63,6 +63,9 @@ if __name__ == '__main__':
     assets_without_rates = set([])
     assignment_to_results = {}
 
+    hit_ids = set([])
+    accepted_hit_ids = set([])
+
     mturk_connection = connection.MTurkConnection(
        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
@@ -71,6 +74,8 @@ if __name__ == '__main__':
         batch_id, assignments.RateTranscriptionAssignment)
 
     for each in all_assignments:
+        hit_ids.add(each.hit_id)
+
         if not each.rates:
             if each.does_not_contain_rates:
                 assets_without_rates.add(each.asset_id)
@@ -107,6 +112,7 @@ if __name__ == '__main__':
                 assignment_to_results[each]
                 for each in assignments]
             results = []
+            accepted_hit_ids.add(hit_id)
 
             if has_consensus_on_parser_results(assignment_results):
                 results = get_consensus_results(assignment_results)
@@ -138,3 +144,8 @@ if __name__ == '__main__':
 
             for each in assignments:
                 assignment_gateway.accept(assignment_to_results[each].assignment)
+
+    print '{} Accepted, {} Total ({:0.02f}%)'.format(
+        len(accepted_hit_ids),
+        len(hit_ids),
+        (len(accepted_hit_ids) / float(len(hit_ids))) * 100.0)
