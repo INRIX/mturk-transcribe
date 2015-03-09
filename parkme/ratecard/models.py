@@ -44,7 +44,7 @@ class ParseResult(object):
         :rtype: ParseResult
         """
         if not assignment.rates:
-            raise ParseFailedException(each.rates)
+            raise ParseFailedException(assignment.rates)
 
         rate_lines = assignment.rates.split('\r\n')
         # Remove any empty lines before parsing
