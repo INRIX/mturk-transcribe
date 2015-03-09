@@ -145,6 +145,8 @@ if __name__ == '__main__':
             for each in assignments:
                 assignment_gateway.accept(assignment_to_results[each].assignment)
 
+    print
+    print 'FINAL RESULTS'
     print '{} Accepted, {} Total ({:0.02f}%)'.format(
         len(accepted_hit_ids) + len(assets_without_rates),
         len(hit_ids),
