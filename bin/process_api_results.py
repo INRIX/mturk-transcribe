@@ -2,6 +2,7 @@ import sys
 sys.path.append('')
 
 import collections
+import itertools
 import sqlite3
 
 from boto.mturk import connection
@@ -16,16 +17,31 @@ from parkme.turk import assignments
 from parkme.turk import hits
 
 
-def parser_results_are_equal(results_a, results_b):
-    """Indicate whether or not parser results are equal.
-    
-    :param results_a: Left-hand results
-    :type results_a: list
-    :param results_b: Right-hand results
-    :type results_b: list
+def get_consensus_results(results):
+    """Get the consensus results from the parser if available.
+
+    :param results: A list of parsed results
+    :type results: list
+    :rtype: str or unicode
+    """
+    for (lhs, rhs) in itertools.combinations(results, 2):
+        if set(lhs) == set(rhs):
+            return lhs
+    return None
+
+
+def has_consensus_on_parser_results(results):
+    """Indicates whether or not the given results contain a consensus.
+
+    :param results: A list of parsed results
+    :type results: list
     :rtype: bool
     """
-    return set(results_a) == set(results_b)
+    num_matches = 0
+    for (lhs, rhs) in itertools.combinations(results, 2):
+        if set(lhs) == set(rhs):
+            num_matches += 1
+    return num_matches >= 2
 
 
 if __name__ == '__main__':
@@ -74,7 +90,7 @@ if __name__ == '__main__':
             each.hit_id, each.worker_id, each.rates)
 
     for hit_id, assignments in rejected_hits.iteritems():
-        if len(assignments) == 2:
+        if len(assignments) >= 2:
             print termcolor.colored('POTENTIAL TOO DIFFICULT: {}'.format(hit_id), 'green')
             manual_review = models.ManualReview(
                 hit_id=hit_id, batch_id=batch_id)
@@ -87,9 +103,12 @@ if __name__ == '__main__':
 
     for hit_id, assignments in accepted_hits.iteritems():
         if len(assignments) == 3:
-            if not parser_results_are_equal(
-                    assignment_to_results[assignments[0]].parsed_rates,
-                    assignment_to_results[assignments[1]].parsed_rates):
+            results = [
+                assignment_to_results[each].parsed_rates
+                for each in assignments]
+            if has_consensus_on_parser_results(results):
+                consensus_result = get_consensus_results(results)
+            else:
                 print
                 print termcolor.colored('RESULT MISMATCH: {}'.format(hit_id), attrs='bold')
                 manual_review = models.ManualReview(
