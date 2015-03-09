@@ -25,7 +25,7 @@ def get_consensus_results(results):
     :rtype: str or unicode
     """
     for (lhs, rhs) in itertools.combinations(results, 2):
-        if set(lhs.parsed_result) == set(rhs.parsed_result):
+        if set(lhs.parsed_rates) == set(rhs.parsed_rates):
             return lhs
     return None
 
@@ -39,7 +39,7 @@ def has_consensus_on_parser_results(results):
     """
     num_matches = 0
     for (lhs, rhs) in itertools.combinations(results, 2):
-        if set(lhs.parsed_result) == set(rhs.parsed_result):
+        if set(lhs.parsed_rates) == set(rhs.parsed_rates):
             num_matches += 1
     return num_matches >= 2
 
