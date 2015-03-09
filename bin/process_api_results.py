@@ -146,6 +146,6 @@ if __name__ == '__main__':
                 assignment_gateway.accept(assignment_to_results[each].assignment)
 
     print '{} Accepted, {} Total ({:0.02f}%)'.format(
-        len(accepted_hit_ids),
+        len(accepted_hit_ids) + len(assets_without_rates),
         len(hit_ids),
         (len(accepted_hit_ids) / float(len(hit_ids))) * 100.0)
