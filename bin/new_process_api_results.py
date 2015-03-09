@@ -40,7 +40,7 @@ def has_consensus_on_rates(assignments):
         try:
             result = ratecard_models.ParseResult.get_for_assignment(each)
             # Has results and exactly one result per line
-            if (filter(None, result.parsed_results) and
+            if (filter(None, result.parsed_rates) and
                     len(result.rates) == len(each.rates.split('\r\n'))):
                 parsed_assignments.append(result)
         except ratecard_models.ParseFailedException:
