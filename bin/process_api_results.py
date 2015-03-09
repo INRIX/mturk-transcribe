@@ -21,11 +21,11 @@ def get_consensus_results(results):
     """Get the consensus results from the parser if available.
 
     :param results: A list of parsed results
-    :type results: list
+    :type results: list of turk.ratecard.models.ParseResult
     :rtype: str or unicode
     """
     for (lhs, rhs) in itertools.combinations(results, 2):
-        if set(lhs) == set(rhs):
+        if set(lhs.parsed_result) == set(rhs.parsed_result):
             return lhs
     return None
 
@@ -34,12 +34,12 @@ def has_consensus_on_parser_results(results):
     """Indicates whether or not the given results contain a consensus.
 
     :param results: A list of parsed results
-    :type results: list
+    :type results: list of turk.ratecard.models.ParseResult
     :rtype: bool
     """
     num_matches = 0
     for (lhs, rhs) in itertools.combinations(results, 2):
-        if set(lhs) == set(rhs):
+        if set(lhs.parsed_result) == set(rhs.parsed_result):
             num_matches += 1
     return num_matches >= 2
 
@@ -103,11 +103,13 @@ if __name__ == '__main__':
 
     for hit_id, assignments in accepted_hits.iteritems():
         if len(assignments) == 3:
-            results = [
-                assignment_to_results[each].parsed_rates
+            assignment_results = [
+                assignment_to_results[each]
                 for each in assignments]
-            if has_consensus_on_parser_results(results):
-                consensus_result = get_consensus_results(results)
+            results = []
+
+            if has_consensus_on_parser_results(assignment_results):
+                results = get_consensus_results(assignment_results)
             else:
                 print
                 print termcolor.colored('RESULT MISMATCH: {}'.format(hit_id), attrs='bold')
@@ -120,10 +122,9 @@ if __name__ == '__main__':
             print termcolor.colored('Accepted Assignment', attrs=['bold'])
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
             print termcolor.colored(
-                'AssignmentId: {}'.format(assignments[0].assignment_id),
+                'AssignmentId: {}'.format(results.assignment_id),
                 attrs=['bold'])
 
-            results = assignment_to_results[assignments[0]]
             print results.rates_str
 
             new_rate = models.TranscribedRate(
