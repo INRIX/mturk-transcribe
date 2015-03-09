@@ -122,7 +122,7 @@ if __name__ == '__main__':
             print termcolor.colored('Accepted Assignment', attrs=['bold'])
             print termcolor.colored('HITId: {}'.format(hit_id), attrs=['bold'])
             print termcolor.colored(
-                'AssignmentId: {}'.format(results.assignment_id),
+                'AssignmentId: {}'.format(results.assignment.assignment_id),
                 attrs=['bold'])
 
             print results.rates_str
