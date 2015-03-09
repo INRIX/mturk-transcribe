@@ -44,6 +44,19 @@ def has_consensus_on_parser_results(results):
     return num_matches >= 2
 
 
+def has_consensus_not_rates(results):
+    """Indicates whether or not there is a consensus that the image is not of
+    a rate card.
+
+    :param results: A list of parsed results
+    :type results: list of turk.ratecard.models.ParseResult
+    :rtype: bool
+    """
+    num_without_rates = sum([
+        1 for each in results if each.assignment.does_not_contain_rates])
+    return num_without_rates >= 2
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "Usage: process_api_results.py [BATCH_ID]"
@@ -65,6 +78,7 @@ if __name__ == '__main__':
 
     hit_ids = set([])
     accepted_hit_ids = set([])
+    hit_ids_without_rates = set([])
 
     mturk_connection = connection.MTurkConnection(
        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
@@ -75,11 +89,6 @@ if __name__ == '__main__':
 
     for each in all_assignments:
         hit_ids.add(each.hit_id)
-
-        if not each.rates:
-            if each.does_not_contain_rates:
-                assets_without_rates.add(each.asset_id)
-            continue
 
         try:
             parse_result = ratecard_models.ParseResult.get_for_assignment(each)
@@ -107,15 +116,18 @@ if __name__ == '__main__':
         print asset_id
 
     for hit_id, assignments in accepted_hits.iteritems():
-        if len(assignments) == 3:
+        if len(assignments) >= 2:
             assignment_results = [
                 assignment_to_results[each]
                 for each in assignments]
             results = []
-            accepted_hit_ids.add(hit_id)
 
-            if has_consensus_on_parser_results(assignment_results):
+            if has_consensus_not_rates(assignment_results):
+                hit_ids_without_rates.add(hit_id)
+                continue
+            elif has_consensus_on_parser_results(assignment_results):
                 results = get_consensus_results(assignment_results)
+                accepted_hit_ids.add(hit_id)
             else:
                 print
                 print termcolor.colored(
@@ -145,11 +157,11 @@ if __name__ == '__main__':
             for each in assignments:
                 assignment_gateway.accept(assignment_to_results[each].assignment)
 
-    num_hits_with_rates = len(hit_ids) - len(assets_without_rates)
+    num_hits_with_rates = len(hit_ids) - len(hit_ids_without_rates)
     print
     print 'FINAL RESULTS'
     print '{} Accepted, {} Total, {} Not Rates ({:0.02f}%)'.format(
         len(accepted_hit_ids),
         num_hits_with_rates,
-        len(assets_without_rates),
+        len(hit_ids_without_rates),
         (len(accepted_hit_ids) / float(num_hits_with_rates)) * 100.0)

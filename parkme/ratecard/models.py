@@ -43,6 +43,9 @@ class ParseResult(object):
         :type assignment: parkme.turk.assignments.Assignment
         :rtype: ParseResult
         """
+        if not assignment.rates:
+            raise ParseFailedException(each.rates)
+
         rate_lines = assignment.rates.split('\r\n')
         # Remove any empty lines before parsing
         rate_lines = filter(None, [each.strip() for each in rate_lines])
