@@ -112,7 +112,8 @@ if __name__ == '__main__':
                 results = get_consensus_results(assignment_results)
             else:
                 print
-                print termcolor.colored('RESULT MISMATCH: {}'.format(hit_id), attrs='bold')
+                print termcolor.colored(
+                    'RESULT MISMATCH: {}'.format(hit_id), attrs=['bold'])
                 manual_review = models.ManualReview(
                     hit_id=hit_id, batch_id=batch_id)
                 manual_review_gateway.save(manual_review)
