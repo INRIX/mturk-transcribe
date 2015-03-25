@@ -263,6 +263,8 @@ class AssignmentGateway(object):
 
         :param batch_id: A batch id
         :type batch_id: int or str or unicode
+        :param assignment_cls: The assignment class to encapsulate results with
+        :type assignment_cls: BaseAssignment
         :rtype: iterable of boto.mturk.Assignment
         """
         all_hits = self.mturk_connection.get_all_hits()
