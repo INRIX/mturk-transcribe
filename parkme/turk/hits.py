@@ -76,7 +76,8 @@ class HITTemplate(object):
                  assignments_per_hit=1,
                  hit_expires_in=datetime.timedelta(days=7),
                  time_per_assignment=datetime.timedelta(hours=1),
-                 auto_approval_delay=datetime.timedelta(hours=8)):
+                 auto_approval_delay=datetime.timedelta(hours=8),
+                 annotation=None):
         """Initialize the HIT template with some basic information.
 
         :param mturk_connection: The mechanical turk connection to use
@@ -102,11 +103,13 @@ class HITTemplate(object):
         self.time_per_assignment = time_per_assignment
         self.auto_approval_delay = auto_approval_delay
 
-    def create_hit(self, params):
+    def create_hit(self, params, batch_id=None):
         """Create a new HIT using this template with the given params.
 
         :param params: A dictionary of template params
         :type params: dict
+        :param batch_id: (Optional) Batch ID to be associated with HIT
+        :type batch_id: str or unicode or None
         :rtype: boto.mturk.HIT
         """
         boto_params = dict_to_layout_parameters(params)
@@ -119,4 +122,5 @@ class HITTemplate(object):
             lifetime=self.hit_expires_in,
             duration=self.time_per_assignment,
             approval_delay=self.auto_approval_delay,
+            annotation=batch_id,
             layout_params=boto_params)
