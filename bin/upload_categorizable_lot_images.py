@@ -77,6 +77,16 @@ def get_uncategorized_assets(dbconn, exclude_before_dt=None):
     return cur
 
 
+def get_row_timestamp(row):
+    """Return the photo timestamp from the given row
+
+    :param row: A database row
+    :type row: tuple
+    :rtype: datetime.datetime
+    """
+    return row[3]
+
+
 def row_to_hit_data(row):
     """Convert the given database row to hit data.
 
@@ -89,6 +99,56 @@ def row_to_hit_data(row):
         'lot_id': row[4],
         'image_url': 'http://{}/{}'.format(row[1], row[2])
     }
+
+
+def get_last_categorized_dt(data_gateway):
+    """Get the timestamp of the oldest categorized photo.
+
+    :param data_gateway: A categorization batch data gateway
+    :type data_gateway: parkme.models.CategorizationBatchDataGateway
+    :rtype: datetime.datetime
+    """
+    most_recent_batch = data_gateway.get_most_recent_batch()
+    if most_recent_batch:
+        return most_recent_batch.newest_photo_timestamp
+    return datetime.datetime(
+        year=datetime.MINYEAR, month=1, day=1, tzinfo=pytz.utc)
+
+
+def print_summary(num_photos, hit_template):
+    """Print a summary containing information about num photos uploaded and
+    estimated pricing.
+
+    :param num_photos: The number of photos
+    :type num_photos: int
+    :param hit_template: A HIT template
+    :type hit_template: parkme.turk.hits.HITTemplate
+    """
+    num_assignments = num_photos * hit_template.assignments_per_hit
+    print
+    print '{} Photos, {} Assignments'.format(num_photos, num_assignments)
+    print 'Estimated Payout: ${:0.02f}'.format(
+        num_assignments * hit_template.reward_per_assignment)
+
+
+def save_categorization_batch(data_gateway, batch_id, newest_categorized_dt):
+    """Save a new categorization batch with the given information.
+
+    :param data_gateway: A data gateway
+    :type data_gateway: parkme.models.CategorizationBatchDataGateway
+    :param batch_id: A unique ID for the batch
+    :type batch_id: str or unicode
+    :param newest_categorized_dt: Timestamp for newest photo categorized
+    :type newest_categorized_dt: datetime.datetime
+    :rtype: parkme.models.CategorizationBatch
+    """
+    categorization_batch = models.CategorizationBatch(
+        categorization_batch_id=batch_id,
+        newest_photo_timestamp=newest_categorized_dt,
+        created_at=datetime.datetime.utcnow(),
+        is_finished=False)
+    data_gateway.save(categorization_batch)
+    return categorization_batch
 
 
 if __name__ == '__main__':
@@ -109,37 +169,23 @@ if __name__ == '__main__':
     data_gateway.create_table()
 
     hit_template = CategorizeLotPhotoTemplate(mturk_connection)
-    most_recent_batch = data_gateway.get_most_recent_batch()
 
     batch_id = str(uuid.uuid4())
     num_photos = 0
-    newest_photo_dt = (
-        most_recent_batch.newest_photo_timestamp
-        if most_recent_batch else
-        datetime.datetime(year=datetime.MINYEAR, month=1, day=1, tzinfo=pytz.utc))
+    last_categorized_dt = get_last_categorized_dt(data_gateway)
 
     print 'BatchID:', batch_id
 
-    for each in get_uncategorized_assets(dbconn, newest_photo_dt):
-        if each[3] >= newest_photo_dt:
-            newest_photo_dt = each[3]
-        data = row_to_hit_data(each)
+    for row in get_uncategorized_assets(dbconn, last_categorized_dt):
+        if get_row_timestamp(row) >= last_categorized_dt:
+            last_categorized_dt = get_row_timestamp(row)
+        data = row_to_hit_data(row)
         print data
         if not options.dry_run:
             hit_template.create_hit(data, batch_id=batch_id)
         num_photos += 1
 
-    num_assignments = num_photos * hit_template.assignments_per_hit
-    print
-    print '{} Photos, {} Assignments'.format(num_photos, num_assignments)
-    print 'Estimated Payout: ${:0.02f}'.format(
-        num_assignments * hit_template.reward_per_assignment)
-
-    cat_batch = models.CategorizationBatch(
-        categorization_batch_id=batch_id,
-        newest_photo_timestamp=newest_photo_dt,
-        created_at=datetime.datetime.utcnow(),
-        is_finished=False)
-    data_gateway.save(cat_batch)
+    print_summary(num_photos, hit_template)
+    save_categorization_batch(data_gateway, batch_id, last_categorized_dt)
 
     dbconn.close()
