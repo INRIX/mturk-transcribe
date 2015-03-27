@@ -26,9 +26,9 @@ class CategorizeLotPhotoTemplate(hits.HITTemplate):
     """MTurk assignment to categorize lot photo templates"""
 
     # (TEST) The ID for [TEST] Categorize Parking Lot Photo
-    HIT_LAYOUT_ID = '33LDDHGJVTUH37V05I853CFD5GV3Q6'
+    # HIT_LAYOUT_ID = '33LDDHGJVTUH37V05I853CFD5GV3Q6'
     # (PRODUCTION) The ID for Categorize Parking Lot Photo
-    # HIT_LAYOUT_ID = '3MCDHXBQ4Z7SJ2ZT2XZACNE142JWKX'
+    HIT_LAYOUT_ID = '3MCDHXBQ4Z7SJ2ZT2XZACNE142JWKX'
 
     def __init__(self, mturk_connection):
         """Initialize categorization HIT template."""
