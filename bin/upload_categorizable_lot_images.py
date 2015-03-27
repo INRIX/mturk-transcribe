@@ -68,7 +68,7 @@ if __name__ == '__main__':
     mturk_connection = connection.MTurkConnection(
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    #dbconn = psycopg2.connect("dbname=pim user=pim")
+    dbconn = psycopg2.connect("dbname=pim user=pim")
 
     data_gateway = models.CategorizationBatchDataGateway('db.sqlite3')
     data_gateway.create_table()
@@ -84,13 +84,19 @@ if __name__ == '__main__':
     batch_id = str(uuid.uuid4())
     num_photos = 0
     print 'BatchID:', batch_id
-    for each in photos:
+    for each in get_uncategorized_assets(dbconn):
+        data = {
+            'asset_id': each[0],
+            'lot_id': each[4],
+            'image_url': 'http://{}/{}'.format(each[1], each[2])
+        }
+        print data
         #hit_template.create_hit(each, batch_id=batch_id)
         num_photos += 1
-    num_assignments = num_photos * 3
+    num_assignments = num_photos * hit_template.assignments_per_hit
     print
     print '{} Photos, {} Assignments'.format(num_photos, num_assignments)
     print 'Estimated Payout: ${:0.02f}'.format(
         num_assignments * hit_template.reward_per_assignment)
 
-    #dbconn.close()
+    dbconn.close()
