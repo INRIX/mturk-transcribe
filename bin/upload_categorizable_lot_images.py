@@ -71,6 +71,9 @@ if __name__ == '__main__':
         '-d', '--dry-run', action='store_true', dest='dry_run', default=False)
     options, _ = parser.parse_args()
 
+    if options.dry_run:
+        print '[DRY RUN]'
+
     mturk_connection = connection.MTurkConnection(
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
