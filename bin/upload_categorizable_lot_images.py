@@ -15,6 +15,7 @@ import uuid
 
 from boto.mturk import connection
 import psycopg2
+import pytz
 
 from parkme import models
 from parkme import settings
@@ -104,7 +105,7 @@ if __name__ == '__main__':
     newest_photo_dt = (
         most_recent_batch.newest_photo_timestamp
         if most_recent_batch else
-        datetime.datetime(year=datetime.MINYEAR, month=1, day=1))
+        datetime.datetime(year=datetime.MINYEAR, month=1, day=1, tzinfo=pytz.utc))
 
     print 'BatchID:', batch_id
 
