@@ -102,7 +102,8 @@ if __name__ == '__main__':
     batch_id = str(uuid.uuid4())
     num_photos = 0
     newest_photo_dt = (
-        most_recent_batch.newest_photo_timestamp or
+        most_recent_batch.newest_photo_timestamp
+        if most_recent_batch else
         datetime.datetime(year=datetime.MINYEAR))
 
     print 'BatchID:', batch_id
