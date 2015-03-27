@@ -137,3 +137,13 @@ class CategorizationBatchDataGateway(BaseDataGateway):
              1 if categorization_batch.is_finished else 0))
         self.dbconn.commit()
         return categorization_batch
+
+    def get_most_recent_batch(self):
+        """Returns the most recent categorization batch.
+
+        :rtype: parkme.models.CategorizationBatch
+        """
+        cursor = self.dbconn.cursor()
+        cursor.execute(
+            "SELECT * FROM categorization_batch ORDER BY created_at DESC LIMIT 1")
+        return CategorizationBatch(*cursor.fetchone())
