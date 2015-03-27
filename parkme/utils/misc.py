@@ -33,7 +33,8 @@ def datetime_to_microtime(dt_value):
     :type dt_value: datetime.datetime
     :rtype: float
     """
-    return time.mktime(dt_value.timetuple()) + dt_value.microsecond / 1E6
+    return (
+        float(time.mktime(dt_value.timetuple())) + dt_value.microsecond / 1E6)
 
 
 def microtime_to_datetime(microtime):
