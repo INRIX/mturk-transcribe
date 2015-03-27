@@ -13,6 +13,8 @@ import time
 
 import pytz
 
+from parkme.utils import misc
+
 
 # Base entity objects
 CategorizationBatch = collections.namedtuple(
@@ -64,8 +66,9 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         cursor.execute(
             "INSERT OR REPLACE INTO categorization_batch VALUES (?, ?, ?, ?)",
             (categorization_batch.categorization_batch_id,
-             time.mktime(categorization_batch.newest_photo_timestamp.timetuple()),
-             time.mktime(categorization_batch.created_at.timetuple()),
+             misc.datetime_to_microtime(
+                 categorization_batch.newest_photo_timestamp),
+             misc.datetime_to_microtime(categorization_batch.created_at),
              1 if categorization_batch.is_finished else 0))
         self.dbconn.commit()
         return categorization_batch
@@ -81,9 +84,9 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         result = cursor.fetchone()
         if result:
             localized_newest_photo_timestamp = (
-                pytz.utc.localize(datetime.datetime.fromtimestamp(result[1])))
+                pytz.utc.localize(misc.microtime_to_datetime(result[1])))
             localized_created_at = (
-                pytz.utc.localize(datetime.datetime.fromtimestamp(result[2])))
+                pytz.utc.localize(misc.microtime_to_datetime(result[2])))
             return CategorizationBatch(
                 categorization_batch_id=result[0],
                 newest_photo_timestamp=localized_newest_photo_timestamp,
