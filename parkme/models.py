@@ -11,6 +11,8 @@ import datetime
 import sqlite3
 import time
 
+import pytz
+
 
 # Base entity objects
 CategorizationBatch = collections.namedtuple(
@@ -78,9 +80,13 @@ class CategorizationBatchDataGateway(BaseDataGateway):
             "SELECT * FROM categorization_batch ORDER BY created_at DESC LIMIT 1")
         result = cursor.fetchone()
         if result:
+            localized_newest_photo_timestamp = (
+                pytz.utc.localize(datetime.datetime.fromtimestamp(result[1])))
+            localized_created_at = (
+                pytz.utc.localize(datetime.datetime.fromtimestamp(result[2])))
             return CategorizationBatch(
                 categorization_batch_id=result[0],
-                newest_photo_timestamp=datetime.datetime.fromtimestamp(result[1]),
-                created_at=datetime.datetime.fromtimestamp(result[2]),
+                newest_photo_timestamp=localized_newest_photo_timestamp,
+                created_at=localized_created_at,
                 is_finished=bool(result[3]))
         return None
