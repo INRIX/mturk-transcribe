@@ -15,6 +15,7 @@ import uuid
 from boto.mturk import connection
 import psycopg2
 
+from parkme import models
 from parkme import settings
 from parkme.turk import hits
 
@@ -67,7 +68,10 @@ if __name__ == '__main__':
     mturk_connection = connection.MTurkConnection(
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    dbconn = psycopg2.connect("dbname=pim user=pim")
+    #dbconn = psycopg2.connect("dbname=pim user=pim")
+
+    data_gateway = models.CategorizationBatchDataGateway('db.sqlite3')
+    data_gateway.create_table()
 
     hit_template = CategorizeLotPhotoTemplate(mturk_connection)
 
@@ -81,7 +85,7 @@ if __name__ == '__main__':
     num_photos = 0
     print 'BatchID:', batch_id
     for each in photos:
-        hit_template.create_hit(each, batch_id=batch_id)
+        #hit_template.create_hit(each, batch_id=batch_id)
         num_photos += 1
     num_assignments = num_photos * 3
     print
@@ -89,4 +93,4 @@ if __name__ == '__main__':
     print 'Estimated Payout: ${:0.02f}'.format(
         num_assignments * hit_template.reward_per_assignment)
 
-    dbconn.close()
+    #dbconn.close()
