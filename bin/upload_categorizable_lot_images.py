@@ -10,6 +10,7 @@ import sys
 sys.path.append('')
 
 import datetime
+import optparse
 import uuid
 
 from boto.mturk import connection
@@ -65,6 +66,11 @@ def get_uncategorized_assets(dbconn):
 
 
 if __name__ == '__main__':
+    parser = optparse.OptionParser()
+    parser.add_option(
+        '-d', '--dry-run', action='store_true', dest='dry_run', default=False)
+    options, _ = parser.parse_args()
+
     mturk_connection = connection.MTurkConnection(
         aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
         aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
@@ -75,12 +81,6 @@ if __name__ == '__main__':
 
     hit_template = CategorizeLotPhotoTemplate(mturk_connection)
 
-    photos = [{
-        'asset_id': 'dcabd582-4180-11e3-962d-22000afd0bd2',
-        'lot_id': 'bd2c4a51-74ef-11df-bd82-e0cb4e8adbbe',
-        'image_url': 'http://s3-w2.parkme.com/lot_img/16365/3d45e861571847e7945b4ca5441f0e63.jpg'
-    }]
-    
     batch_id = str(uuid.uuid4())
     num_photos = 0
     print 'BatchID:', batch_id
@@ -91,7 +91,10 @@ if __name__ == '__main__':
             'image_url': 'http://{}/{}'.format(each[1], each[2])
         }
         print data
-        #hit_template.create_hit(each, batch_id=batch_id)
+
+        if not options.dry_run:
+            hit_template.create_hit(each, batch_id=batch_id)
+
         num_photos += 1
     num_assignments = num_photos * hit_template.assignments_per_hit
     print
