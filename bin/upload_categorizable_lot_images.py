@@ -104,7 +104,7 @@ if __name__ == '__main__':
     newest_photo_dt = (
         most_recent_batch.newest_photo_timestamp
         if most_recent_batch else
-        datetime.datetime(year=datetime.MINYEAR))
+        datetime.datetime(year=datetime.MINYEAR, month=1, day=1))
 
     print 'BatchID:', batch_id
 
