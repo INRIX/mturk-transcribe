@@ -75,4 +75,11 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         cursor = self.dbconn.cursor()
         cursor.execute(
             "SELECT * FROM categorization_batch ORDER BY created_at DESC LIMIT 1")
-        return CategorizationBatch(*cursor.fetchone())
+        result = cursor.fetchone()
+        if result:
+            return CategorizationBatch(
+                categorization_batch_id=result[0],
+                newest_photo_timestamp=datetime.datetime.fromtimestamp(result[1]),
+                created_at=datetime.datetime.fromtimestamp(result[2]),
+                is_finished=bool(result[3]))
+        return None

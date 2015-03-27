@@ -65,6 +65,20 @@ def get_uncategorized_assets(dbconn):
     return cur
 
 
+def row_to_hit_data(row):
+    """Convert the given database row to hit data.
+
+    :param row: A database row
+    :type row: tuple
+    :rtype: dict
+    """
+    return {
+        'asset_id': row[0],
+        'lot_id': row[4],
+        'image_url': 'http://{}/{}'.format(row[1], row[2])
+    }
+
+
 if __name__ == '__main__':
     parser = optparse.OptionParser()
     parser.add_option(
@@ -83,26 +97,36 @@ if __name__ == '__main__':
     data_gateway.create_table()
 
     hit_template = CategorizeLotPhotoTemplate(mturk_connection)
+    most_recent_batch = data_gateway.get_most_recent_batch()
 
     batch_id = str(uuid.uuid4())
     num_photos = 0
+    newest_photo_dt = (
+        most_recent_batch.newest_photo_timestamp or
+        datetime.datetime(year=datetime.MINYEAR))
+
     print 'BatchID:', batch_id
+
     for each in get_uncategorized_assets(dbconn):
-        data = {
-            'asset_id': each[0],
-            'lot_id': each[4],
-            'image_url': 'http://{}/{}'.format(each[1], each[2])
-        }
+        if each[3] >= newest_photo_dt:
+            newest_photo_dt = each[3]
+        data = row_to_hit_data(each)
         print data
-
         if not options.dry_run:
-            hit_template.create_hit(each, batch_id=batch_id)
-
+            hit_template.create_hit(data, batch_id=batch_id)
         num_photos += 1
+
     num_assignments = num_photos * hit_template.assignments_per_hit
     print
     print '{} Photos, {} Assignments'.format(num_photos, num_assignments)
     print 'Estimated Payout: ${:0.02f}'.format(
         num_assignments * hit_template.reward_per_assignment)
+
+    cat_batch = models.CategorizationBatch(
+        categorization_batch_id=batch_id,
+        newest_photo_timestamp=newest_photo_dt,
+        created_at=datetime.datetime.utcnow(),
+        is_finished=False)
+    data_gateway.save(cat_batch)
 
     dbconn.close()
