@@ -42,15 +42,18 @@ class CategorizeLotPhotoTemplate(hits.HITTemplate):
             auto_approval_delay=datetime.timedelta(hours=8))
 
 
-def get_uncategorized_assets(dbconn):
+def get_uncategorized_assets(dbconn, exclude_before_dt=None):
     """Returns the uncategorized assets found in the database.
 
     :param dbconn: A database connection
     :type dbconn: psycopg2.Connection
+    :param exclude_before_dt: (Optional) Exclude items before the given time
+    :type exclude_before_dt: datetime.datetime
     :rtype: psycopg2.Cursor
     """
     cur = dbconn.cursor()
-    cur.execute('''
+    params = [datetime.datetime.utcnow().year]
+    query = '''
     SELECT assetct.pk_asset, str_bucket, str_path, dt_photo, pk_lot FROM (
        SELECT
        asset.*, COUNT(asset_lot_asset_type_xref.*) AS category_count
@@ -61,8 +64,16 @@ def get_uncategorized_assets(dbconn):
     AND (str_rates IS NULL OR str_rates='')
     AND pk_lot_status != 7
     AND extract(year from dt_photo) < %s
-    AND assetct.category_count=0;
-    ''', (datetime.datetime.utcnow().year,))
+    AND assetct.category_count=0
+    '''
+
+    # Add clause to exclude photos before timestamp
+    if exclude_before_dt:
+        query += 'AND dt_photo > %s'
+        params.append(exclude_before_dt)
+
+    query += ';'
+    cur.execute(query, params)
     return cur
 
 
@@ -109,7 +120,7 @@ if __name__ == '__main__':
 
     print 'BatchID:', batch_id
 
-    for each in get_uncategorized_assets(dbconn):
+    for each in get_uncategorized_assets(dbconn, newest_photo_dt):
         if each[3] >= newest_photo_dt:
             newest_photo_dt = each[3]
         data = row_to_hit_data(each)
