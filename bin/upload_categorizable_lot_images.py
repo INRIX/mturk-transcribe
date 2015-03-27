@@ -44,6 +44,7 @@ def get_uncategorized_assets(dbconn):
 
     :param dbconn: A database connection
     :type dbconn: psycopg2.Connection
+    :rtype: psycopg2.Cursor
     """
     cur = dbconn.cursor()
     cur.execute('''
@@ -59,6 +60,7 @@ def get_uncategorized_assets(dbconn):
     AND extract(year from dt_photo) < %s
     AND assetct.category_count=0;
     ''', (datetime.datetime.utcnow().year,))
+    return cur
 
 
 if __name__ == '__main__':
