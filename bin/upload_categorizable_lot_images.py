@@ -186,6 +186,8 @@ if __name__ == '__main__':
         num_photos += 1
 
     print_summary(num_photos, hit_template)
-    save_categorization_batch(data_gateway, batch_id, last_categorized_dt)
+
+    if not options.dry_run:
+        save_categorization_batch(data_gateway, batch_id, last_categorized_dt)
 
     dbconn.close()
