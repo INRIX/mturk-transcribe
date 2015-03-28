@@ -204,7 +204,10 @@ if __name__ == '__main__':
         print "Print out results of scanning validation results."
         exit(1)
 
-    batch_id = int(sys.argv[1])
+    try:
+        batch_id = int(sys.argv[1])
+    except ValueError:
+        batch_id = str(sys.argv[1])
 
     assignments_for_assets = collections.defaultdict(list)
     accepted_hits = set([])
