@@ -240,6 +240,7 @@ if __name__ == '__main__':
                 set_categories_for_asset(asset_id, winning_categories)
                 mark_approved(asset_id)
             elif majority_considered_uncategorizable(assignments):
+                print "{} UNCATEGORIZABLE".format(assignments[0].hit_id)
                 # Accept all of the assignments (but don't keep categories)
                 for each in assignments:
                     assignment_gateway.accept(each)
