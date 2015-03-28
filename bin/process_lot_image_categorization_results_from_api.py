@@ -212,6 +212,7 @@ if __name__ == '__main__':
     assignments_for_assets = collections.defaultdict(list)
     accepted_hits = set([])
     rejected_hits = set([])
+    uncategorizable_hits = set([])
     lot_ids = set([])
 
     mturk_connection = connection.MTurkConnection(
@@ -246,6 +247,7 @@ if __name__ == '__main__':
                     assignment_gateway.accept(each)
                 # Mark the asset as approved
                 mark_approved(asset_id)
+                uncategorizable_hits.add(assignments[0].hit_id)
             else:
                 # No consensus could be reached
                 print "{} NO CONSENSUS".format(assignments[0].hit_id)
@@ -267,8 +269,9 @@ if __name__ == '__main__':
         * 100.0)
     print
     print "RESULTS"
-    print "{} Accepted, {} Rejected ({:0.02f}%)".format(
-        len(accepted_hits), len(rejected_hits), percent_accepted)
+    print "{} Accepted, {} Rejected, {} Uncategorizable ({:0.02f}%)".format(
+        len(accepted_hits), len(rejected_hits),
+        len(uncategorizable_hits), percent_accepted)
     print
     print "NO CONSENSUS HIT IDS"
     for hit_id in rejected_hits:
