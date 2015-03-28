@@ -23,7 +23,10 @@ def in_batch(hit, batch_id):
     :type batch_id: int or str or unicode
     :rtype: bool
     """
-    return str(batch_id) in hit.RequesterAnnotation
+    try:
+        return str(batch_id) in hit.RequesterAnnotation
+    except AttributeError:
+        return False
 
 
 def has_pending_assignments(hit):
