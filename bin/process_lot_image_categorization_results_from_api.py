@@ -247,7 +247,7 @@ if __name__ == '__main__':
                 mark_approved(asset_id)
             else:
                 # No consensus could be reached
-                print "{} REJECTED".format(assignments[0].hit_id)
+                print "{} NO CONSENSUS".format(assignments[0].hit_id)
                 for each in assignments:
                     assignment_gateway.accept(each)
                 rejected_hits.add(assignments[0].hit_id)
@@ -269,6 +269,6 @@ if __name__ == '__main__':
     print "{} Accepted, {} Rejected ({:0.02f}%)".format(
         len(accepted_hits), len(rejected_hits), percent_accepted)
     print
-    print "REJECTED HIT IDS"
+    print "NO CONSENSUS HIT IDS"
     for hit_id in rejected_hits:
         print hit_id
