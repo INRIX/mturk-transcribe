@@ -235,8 +235,7 @@ if __name__ == '__main__':
                 print '{} ACCEPTED {}'.format(assignments[0].hit_id, asset_id)
                 winning_categories = get_consensus_categories(assignments)
                 for each in assignments:
-                    if each.categories:
-                        assignment_gateway.accept(each)
+                    assignment_gateway.accept(each)
                 accepted_hits.add(assignments[0].hit_id)
                 set_categories_for_asset(asset_id, winning_categories)
                 mark_approved(asset_id)
