@@ -86,14 +86,39 @@ class CategorizationBatchDataGateway(BaseDataGateway):
             "SELECT * FROM categorization_batch ORDER BY created_at DESC LIMIT 1")
         result = cursor.fetchone()
         if result:
-            localized_newest_photo_timestamp = (
-                pytz.utc.localize(misc.microtime_to_datetime(result[1])))
-            localized_created_at = (
-                pytz.utc.localize(misc.microtime_to_datetime(result[2])))
-            return CategorizationBatch(
-                categorization_batch_id=result[0],
-                newest_photo_timestamp=localized_newest_photo_timestamp,
-                created_at=localized_created_at,
-                num_photos=result[3],
-                is_finished=bool(result[4]))
+            return self._raw_result_to_categorization_batch_obj(result)
         return None
+
+    def get_all_unfinished(self):
+        """Return a list containing the information for all unfinished batches.
+
+        :rtype: list of parkme.models.CategorizationBatch
+        """
+        cursor = self.dbconn.cursor()
+        cursor.execute(
+            "SELECT * FROM categorization_batch WHERE is_finished=false"
+            " ORDER BY created_at DESC")
+        results = []
+        for result in cursor:
+            results.append(
+                self._raw_result_to_categorization_batch_obj(result))
+        return results
+
+    def _raw_result_to_categorization_batch_obj(self, raw_result):
+        """Convert a raw result from the database into a categorization batch
+        object.
+
+        :param raw_result: A raw result
+        :type raw_result: tuple
+        :rtype: parkme.models.CategorizationBatch
+        """
+        localized_newest_photo_timestamp = (
+            pytz.utc.localize(misc.microtime_to_datetime(raw_result[1])))
+        localized_created_at = (
+            pytz.utc.localize(misc.microtime_to_datetime(raw_result[2])))
+        return CategorizationBatch(
+            categorization_batch_id=raw_result[0],
+            newest_photo_timestamp=localized_newest_photo_timestamp,
+            created_at=localized_created_at,
+            num_photos=raw_result[3],
+            is_finished=bool(raw_result[4]))
