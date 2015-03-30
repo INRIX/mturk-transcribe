@@ -131,7 +131,8 @@ def print_summary(num_photos, hit_template):
         num_assignments * hit_template.reward_per_assignment)
 
 
-def save_categorization_batch(data_gateway, batch_id, newest_categorized_dt):
+def save_categorization_batch(
+        data_gateway, batch_id, newest_categorized_dt, num_photos):
     """Save a new categorization batch with the given information.
 
     :param data_gateway: A data gateway
@@ -140,12 +141,15 @@ def save_categorization_batch(data_gateway, batch_id, newest_categorized_dt):
     :type batch_id: str or unicode
     :param newest_categorized_dt: Timestamp for newest photo categorized
     :type newest_categorized_dt: datetime.datetime
+    :param num_photos: The number of photos in the batch
+    :type num_photos: int
     :rtype: parkme.models.CategorizationBatch
     """
     categorization_batch = models.CategorizationBatch(
         categorization_batch_id=batch_id,
         newest_photo_timestamp=newest_categorized_dt,
         created_at=datetime.datetime.utcnow(),
+        num_photos=num_photos,
         is_finished=False)
     data_gateway.save(categorization_batch)
     return categorization_batch
@@ -188,6 +192,7 @@ if __name__ == '__main__':
     print_summary(num_photos, hit_template)
 
     if not options.dry_run:
-        save_categorization_batch(data_gateway, batch_id, last_categorized_dt)
+        save_categorization_batch(
+            data_gateway, batch_id, last_categorized_dt, num_photos)
 
     dbconn.close()

@@ -22,6 +22,7 @@ CategorizationBatch = collections.namedtuple(
     ['categorization_batch_id',
      'newest_photo_timestamp',
      'created_at',
+     'num_photos',
      'is_finished'])
 
 
@@ -52,6 +53,7 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         (categorization_batch_id TEXT PRIMARY KEY,
         newest_photo_timestamp NUMERIC,
         created_at NUMERIC,
+        num_photos INTEGER,
         is_finished NUMERIC)
         ''')
 
@@ -64,11 +66,12 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         """
         cursor = self.dbconn.cursor()
         cursor.execute(
-            "INSERT OR REPLACE INTO categorization_batch VALUES (?, ?, ?, ?)",
+            "INSERT OR REPLACE INTO categorization_batch VALUES (?, ?, ?, ?, ?)",
             (categorization_batch.categorization_batch_id,
              misc.datetime_to_microtime(
                  categorization_batch.newest_photo_timestamp),
              misc.datetime_to_microtime(categorization_batch.created_at),
+             categorization_batch.num_photos,
              1 if categorization_batch.is_finished else 0))
         self.dbconn.commit()
         return categorization_batch
@@ -91,5 +94,6 @@ class CategorizationBatchDataGateway(BaseDataGateway):
                 categorization_batch_id=result[0],
                 newest_photo_timestamp=localized_newest_photo_timestamp,
                 created_at=localized_created_at,
-                is_finished=bool(result[3]))
+                num_photos=result[3],
+                is_finished=bool(result[4]))
         return None
