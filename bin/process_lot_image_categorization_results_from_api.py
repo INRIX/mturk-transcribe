@@ -263,6 +263,12 @@ if __name__ == '__main__':
         print lot_id
         adjust_show_quality_images_for_lot(lot_id)
 
+    num_assignments_processed = (
+        len(accepted_hits) + len(uncategorizable_hits) + len(rejected_hits))
+
+    if num_assignments_processed == len(assignments_for_assets.keys()):
+        print "ALL ASSIGNMENTS PROCESSED"
+
     percent_accepted = (
         float(len(accepted_hits) + len(uncategorizable_hits)) / len(assignments_for_assets.keys())
         * 100.0)
