@@ -264,11 +264,11 @@ if __name__ == '__main__':
         adjust_show_quality_images_for_lot(lot_id)
 
     percent_accepted = (
-        float(len(accepted_hits)) / len(assignments_for_assets.keys())
+        float(len(accepted_hits) + len(uncategorizable_hits)) / len(assignments_for_assets.keys())
         * 100.0)
     print
     print "RESULTS"
-    print "{} Accepted, {} Rejected, {} Uncategorizable ({:0.02f}%)".format(
+    print "{} Accepted, {} No Consensus, {} Uncategorizable ({:0.02f}%)".format(
         len(accepted_hits), len(rejected_hits),
         len(uncategorizable_hits), percent_accepted)
     print
