@@ -96,7 +96,7 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         """
         cursor = self.dbconn.cursor()
         cursor.execute(
-            """SELECT * FROM categorization_batch WHERE is_finished=f
+            """SELECT * FROM categorization_batch WHERE is_finished=0
              ORDER BY created_at DESC;""")
         results = []
         for result in cursor:
