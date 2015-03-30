@@ -261,9 +261,6 @@ def process_results(batch_id):
     num_assignments_processed = (
         len(accepted_hits) + len(uncategorizable_hits) + len(rejected_hits))
 
-    if num_assignments_processed == len(assignments_for_assets.keys()):
-        print "ALL ASSIGNMENTS PROCESSED"
-
     percent_accepted = (
         float(len(accepted_hits) + len(uncategorizable_hits)) / len(assignments_for_assets.keys())
         * 100.0)
@@ -276,6 +273,10 @@ def process_results(batch_id):
     print "NO CONSENSUS HIT IDS"
     for hit_id in rejected_hits:
         print hit_id
+
+    if num_assignments_processed == len(assignments_for_assets.keys()):
+        return True
+    return False
 
 
 if __name__ == '__main__':
