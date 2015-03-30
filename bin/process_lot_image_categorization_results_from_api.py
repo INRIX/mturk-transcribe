@@ -198,17 +198,12 @@ def adjust_show_quality_images_for_lot(lot_id):
                     unmark_show_quality(next_asset_id)
 
 
-if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print "Usage: process_categorization_results.py [BATCH_ID]"
-        print "Print out results of scanning validation results."
-        exit(1)
+def process_results(batch_id):
+    """Process image categorization results from the batch with the given id.
 
-    try:
-        batch_id = int(sys.argv[1])
-    except ValueError:
-        batch_id = str(sys.argv[1])
-
+    :param batch_id: A batch id
+    :type batch_id: int
+    """
     assignments_for_assets = collections.defaultdict(list)
     accepted_hits = set([])
     rejected_hits = set([])
@@ -281,3 +276,17 @@ if __name__ == '__main__':
     print "NO CONSENSUS HIT IDS"
     for hit_id in rejected_hits:
         print hit_id
+
+
+if __name__ == '__main__':
+    if len(sys.argv) != 2:
+        print "Usage: process_categorization_results.py [BATCH_ID]"
+        print "Print out results of scanning validation results."
+        exit(1)
+
+    try:
+        batch_id = int(sys.argv[1])
+    except ValueError:
+        batch_id = str(sys.argv[1])
+
+    process_results(batch_id)
