@@ -110,6 +110,7 @@ if __name__ == '__main__':
     hit_ids_without_rate_card = set([])
     hit_ids_with_consensus = set([])
     hit_ids_without_consensus = set([])
+    lot_ids_with_consensus = set([])
 
     for hit_id, assignments in hit_id_to_assignments.iteritems():
         if len(assignments) == 3:
@@ -117,6 +118,7 @@ if __name__ == '__main__':
                 hit_ids_without_rate_card.add(hit_id)
             elif has_consensus_on_rates(assignments):
                 hit_ids_with_consensus.add(hit_id)
+                lot_ids_with_consensus.add(assignments[0].lot_id)
             else:
                 hit_ids_without_consensus.add(hit_id)
 
@@ -141,3 +143,7 @@ if __name__ == '__main__':
     for hit_id in hit_ids_with_consensus:
         print hit_id
         print get_consensus_rates(hit_id_to_assignments[hit_id])
+    print
+    print 'CONSENSUS LOT IDS'
+    for lot_id in lot_ids_with_consensus:
+        print lot_id
