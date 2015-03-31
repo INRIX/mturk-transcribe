@@ -16,8 +16,14 @@ def process_outstanding_batches():
     data_gateway = models.CategorizationBatchDataGateway('db.sqlite3')
     for each in data_gateway.get_all_unfinished():
         if process_results(each.categorization_batch_id):
-            each.is_finished = True
-            data_gateway.save(each)
+            updated_each = models.CategorizationBatch(
+                categorization_batch_id=each.categorization_batch_id,
+                newest_photo_timestamp=each.newest_photo_timestamp,
+                created_at=each.created_at,
+                num_photos=each.num_photos,
+                is_finished=True
+            )
+            data_gateway.save(updated_each)
 
 
 if __name__ == "__main__":
