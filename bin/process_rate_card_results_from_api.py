@@ -6,6 +6,7 @@ import itertools
 
 from boto.mturk import connection
 
+from parkme import db
 from parkme import settings
 from parkme.ratecard import models as ratecard_models
 from parkme.turk import assignments
@@ -87,6 +88,21 @@ def get_consensus_rates(assignments):
     return None
 
 
+def save_consensus_rates(lot_id, rates):
+    """Save the consensus rates for the given lot.
+
+    :param lot_id: A lot id
+    :type lot_id: str or unicode
+    :param rates: A list of rates
+    :type rates: list
+    """
+    rates_formatted = '\r\n'.join(rates)
+    with db.cursor() as (cur, _):
+        cur.execute(
+            'UPDATE lot SET str_rates=%s WHERE pk_lot=%s;',
+            (rates_formatted, lot_id))
+
+
 if __name__ == '__main__':
     if len(sys.argv) < 2:
         print "Usage: process_api_results.py [BATCH_ID]"
@@ -110,7 +126,7 @@ if __name__ == '__main__':
     hit_ids_without_rate_card = set([])
     hit_ids_with_consensus = set([])
     hit_ids_without_consensus = set([])
-    lot_ids_with_consensus = set([])
+    hit_ids_to_lot_id = {}
 
     for hit_id, assignments in hit_id_to_assignments.iteritems():
         if len(assignments) == 3:
@@ -118,7 +134,7 @@ if __name__ == '__main__':
                 hit_ids_without_rate_card.add(hit_id)
             elif has_consensus_on_rates(assignments):
                 hit_ids_with_consensus.add(hit_id)
-                lot_ids_with_consensus.add(assignments[0].lot_id)
+                hit_ids_to_lot_id[hit_id] = assignments[0].lot_id
             else:
                 hit_ids_without_consensus.add(hit_id)
 
@@ -141,9 +157,8 @@ if __name__ == '__main__':
     print
     print 'CONSENSUS HIT IDS'
     for hit_id in hit_ids_with_consensus:
-        print hit_id
-        print get_consensus_rates(hit_id_to_assignments[hit_id])
-    print
-    print 'CONSENSUS LOT IDS'
-    for lot_id in lot_ids_with_consensus:
-        print lot_id
+        lot_id = hit_ids_to_lot_id[hit_id]
+        rates = get_consensus_rates(hit_id_to_assignments[hit_id])
+        print hit_id, '-', lot_id
+        print rates
+        save_consensus_rates(hit_ids_to_lot_id[hit_id], rates)
