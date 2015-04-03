@@ -7,6 +7,37 @@ import mock
 from parkme.turk import assignments
 
 
+class GetAnswerToQuestionTest(unittest.TestCase):
+
+    def setUp(self):
+        super(GetAnswerToQuestionTest, self).setUp()
+
+        self.MOCK_QUESTION_ID = str(uuid.uuid4())
+
+        self.mock_assignment = mock.Mock()
+        self.mock_question = mock.Mock()
+        self.mock_question.qid = self.MOCK_QUESTION_ID
+        self.mock_assignment.answers = [[self.mock_question]]
+
+    def test_should_return_none_if_no_answers_in_assignment(self):
+        """Should return None if no answers in assignment"""
+        self.mock_assignment.answers = []
+        self.assertIsNone(
+            assignments.get_answer_to_question(self.mock_assignment, 'herp'))
+
+    def test_should_return_none_if_question_not_in_assignment(self):
+        """Should return None if question not in assignment"""
+        self.assertIsNone(
+            assignments.get_answer_to_question(self.mock_assignment, 'herp'))
+
+    def test_should_return_question_for_given_question_id(self):
+        """Should return question for given question id"""
+        self.assertEqual(
+            self.mock_question,
+            assignments.get_answer_to_question(
+                self.mock_assignment, self.MOCK_QUESTION_ID))
+
+
 class BaseAssignmentTest(unittest.TestCase):
 
     def setUp(self):

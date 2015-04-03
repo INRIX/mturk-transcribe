@@ -42,9 +42,14 @@ def get_answer_to_question(assignment, question_id):
     :return: All answers to the given question
     :rtype: str or unicode or None
     """
+    if not assignment.answers:
+        return None
+
     for each in assignment.answers[0]:
         if each.qid == question_id:
             return each
+
+    return None
 
 
 class BaseAssignment(object):
