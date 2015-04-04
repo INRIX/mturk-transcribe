@@ -12,6 +12,8 @@ import itertools
 from boto.mturk import layoutparam
 from boto.mturk import price
 
+from parkme import exceptions
+
 
 def in_batch(hit, batch_id):
     """Indicates whether or not the given HIT is in the batch with the given
@@ -36,7 +38,10 @@ def has_pending_assignments(hit):
     :type hit: mturk.connection.HIT
     :rtype: bool
     """
-    return int(hit.NumberOfAssignmentsPending) > 0
+    try:
+        return int(hit.NumberOfAssignmentsPending) > 0
+    except AttributeError:
+        return False
 
 
 def filter_by_batch_id(hits, batch_id):
@@ -55,16 +60,19 @@ def filter_by_batch_id(hits, batch_id):
 
 
 def dict_to_layout_parameters(dict_to_convert):
-    """Mechanical turk layout parameters are really just an overly formalized
-    dictionary.
+    """Convert a dictionary into Mechanical Turk layout parameters. Mechanical
+    turk layout parameters are really just an overly formalized dictionary.
 
     :param dict_to_convert: A dictionary to convert
     :type dict_to_convert: dict
     :rtype: boto.mturk.layoutparam.LayoutParameters
     """
     params = []
-    for key, value in dict_to_convert.iteritems():
-        params.append(layoutparam.LayoutParameter(key, value))
+
+    if dict_to_convert:
+        for key, value in dict_to_convert.iteritems():
+            params.append(layoutparam.LayoutParameter(key, value))
+
     return layoutparam.LayoutParameters(params)
 
 
