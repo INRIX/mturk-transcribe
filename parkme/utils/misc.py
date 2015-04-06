@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
     parkme.utils.misc
     ~~~~~~~~~~~~~~~~~
