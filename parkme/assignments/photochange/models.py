@@ -6,10 +6,16 @@
 
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
+import collections
 import datetime
 
 from parkme.turk import assignments
 from parkme.turk import hits
+
+
+ComparableAsset = collections.namedtuple(
+    'ComparableAsset',
+    ['pk_asset', 'pk_lot', 'str_bucket', 'str_path', 'dt_photo'])
 
 
 class PhotoChangeTemplate(hits.HITTemplate):
