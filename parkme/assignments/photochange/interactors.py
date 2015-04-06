@@ -112,6 +112,8 @@ def get_comparable_assets(db_connection):
     :type db_connection: psycopg2.Connection
     :rtype: iterable
     """
+    for lot_id in get_all_lots(db_connection):
+        yield list(get_comparable_assets_for_lot(db_connection, lot_id))
 
 
 def upload_tasks_to_turk(mturk_connection, db_connection):
