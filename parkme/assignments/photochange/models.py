@@ -15,7 +15,7 @@ from parkme.turk import hits
 class PhotoChangeTemplate(hits.HITTemplate):
     """MTurk assignment to check for photo changes"""
 
-    HIT_LAYOUT_ID = ''
+    HIT_LAYOUT_ID = '3NUKNKVODMJSU6BNU5ZCS9YSFU8A54'
 
     def __init__(self, mturk_connection):
         """Initialize photo change HIT template"""
