@@ -15,7 +15,7 @@ from parkme.turk import hits
 
 ComparableAsset = collections.namedtuple(
     'ComparableAsset',
-    ['pk_asset', 'pk_lot', 'str_bucket', 'str_path', 'dt_photo'])
+    ['asset_id', 'lot_id', 'str_bucket', 'str_path', 'dt_photo'])
 
 
 class PhotoChangeTemplate(hits.HITTemplate):

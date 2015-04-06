@@ -50,6 +50,41 @@ def get_remaining_assets(asset_group):
     return asset_group[1:]
 
 
+def asset_to_image_url(asset_bucket, asset_path):
+    """Convert the given asset information into a URL.
+
+    :param asset_bucket: The bucket containing the asset
+    :type asset_bucket: str or unicode
+    :param asset_path: The path containing the asset
+    :type asset_path: str or unicode
+    :rtype: str or unicode
+    """
+    return u'http://{}/{}'.format(asset_bucket, asset_path)
+
+
+def get_assignment_data(new_asset, old_asset):
+    """Convert the given comparable assets into format for image comparison
+    task.
+
+    :param new_asset: The new asset
+    :type new_asset: models.ComparableAsset
+    :param old_asset: The old asset
+    :type old_asset: models.ComparableAsset
+    :rtype: dict
+    """
+    new_image_url = asset_to_image_url(
+        new_asset.str_bucket, new_asset.str_path)
+    old_image_url = asset_to_image_url(
+        old_asset.str_bucket, old_asset.str_path)
+    return {
+        'new_image_url': new_image_url,
+        'new_asset_id': new_asset.asset_id,
+        'old_image_url': old_image_url,
+        'old_asset_id': old_asset.asset_id,
+        'lot_id': new_asset.lot_id
+    }
+
+
 def get_comparable_assets_for_lot(db_connection, lot_id):
     """Get all assets ready for comparison.
 
@@ -123,10 +158,17 @@ def upload_tasks_to_turk(mturk_connection, db_connection):
     :type mturk_connection: boto.mturk.Connection
     :param db_connection: A database connection
     :type db_connection: psycopg2.Connection
+    :return: Number of items uploaded
+    :rtype: int
     """
+    num_items_uploaded = 0
     for asset_group in get_comparable_assets(db_connection):
         if not has_enough_assets_to_compare(asset_group):
             continue
 
         newest_asset = get_newest_asset(asset_group)
         remaining_assets = get_remaining_assets(asset_group)
+        for old_asset in remaining_assets:
+            assignment_data = get_assignment_data(newest_asset, old_asset)
+            num_items_uploaded += 1
+    return num_items_uploaded
