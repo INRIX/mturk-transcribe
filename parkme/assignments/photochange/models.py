@@ -6,7 +6,27 @@
 
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
+import datetime
+
 from parkme.turk import assignments
+from parkme.turk import hits
+
+
+class PhotoChangeTemplate(hits.HITTemplate):
+    """MTurk assignment to check for photo changes"""
+
+    HIT_LAYOUT_ID = ''
+
+    def __init__(self, mturk_connection):
+        """Initialize photo change HIT template"""
+        super(PhotoChangeTemplate, self).__init__(
+            mturk_connection=mturk_connection,
+            hit_layout_id=self.HIT_LAYOUT_ID,
+            reward_per_assignment=0.02,
+            assignments_per_hit=3,
+            hit_expires_in=datetime.timedelta(days=7),
+            time_per_assignment=datetime.timedelta(minutes=3),
+            auto_approval_delay=datetime.timedelta(hours=8))
 
 
 class PhotoChangeAssignment(assignments.BaseAssignment):
