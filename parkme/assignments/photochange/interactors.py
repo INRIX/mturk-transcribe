@@ -105,7 +105,7 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     ORDER BY asset.dt_photo DESC
     '''
     cursor.execute(query, params)
-    return itertools.imap(models.ComparableAsset, cursor)
+    return itertools.imap(lambda args: models.ComparableAsset(*args), cursor)
 
 
 def get_all_lots(db_connection):
