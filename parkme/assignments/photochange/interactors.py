@@ -14,22 +14,6 @@ from parkme.assignments import utils
 from parkme.assignments.photochange import models
 
 
-#TODO(etscrivner): Remove these temporary notes
-# Getting available assets:
-#
-# - For each lot in the system
-#   - For each rates image in the system
-#     - Sort and retrieve only the newest rates
-#
-# Lots can be in any of these situations:
-#
-# - Newest photo not yet marked as show quality
-# - Newest photo marked as show quality
-#
-# No matter what the scenario is we'd like to compare the newest photo against
-# all the other images.
-
-
 def has_enough_assets_to_compare(asset_group):
     """Simple predicate to determine whether the given asset group contains
     enough assets to run a comparison.
@@ -141,8 +125,24 @@ def get_comparable_assets(db_connection):
         yield list(get_comparable_assets_for_lot(db_connection, lot_id))
 
 
-def upload_tasks_to_turk(mturk_connection, db_connection):
-    """Upload tasks to Mechanical Turk.
+def upload_assignments_to_turk(new_asset, older_assets):
+    """Given the newest asset and a list of older assets this task will create an
+    assignment to match the new asset with each of the older assets.
+
+    :param new_asset: The newest asset
+    :type new_asset: parkme.assignments.photochange.models.ComparableAsset
+    :param older_assets: The older assets
+    :type older_assets: list
+    """
+    for index, old_asset in enumerate(older_assets):
+        assignment_data = get_assignment_data(new_asset, old_asset)
+        if not index:
+            print assignment_data['new_image_url']
+        print assignment_data['old_image_url']
+
+
+def upload_all_tasks_to_turk(mturk_connection, db_connection):
+    """Upload all tasks to Mechanical Turk.
 
     :param mturk_connection: A Mechanical Turk connection
     :type mturk_connection: boto.mturk.Connection
@@ -158,10 +158,6 @@ def upload_tasks_to_turk(mturk_connection, db_connection):
 
         newest_asset = get_newest_asset(asset_group)
         remaining_assets = get_remaining_assets(asset_group)
-        for index, old_asset in enumerate(remaining_assets):
-            assignment_data = get_assignment_data(newest_asset, old_asset)
-            if not index:
-                print assignment_data['new_image_url']
-            print assignment_data['old_image_url']
-            num_items_uploaded += 1
+        upload_assignments_to_turk(newest_asset, remaining_assets)
+        num_items_uploaded += len(remaining_assets)
     return num_items_uploaded
