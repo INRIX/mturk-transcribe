@@ -8,6 +8,7 @@
 """
 import collections
 import sys
+import uuid
 
 sys.path.append('')
 
@@ -45,7 +46,9 @@ def get_lot_id(psql_connection, lot_id):
 
 if __name__ == '__main__':
     pgsql_connection = psycopg2.connect("dbname=pim user=pim")
+    hit_id = str(uuid.uuid4())
     try:
+        print 'HIT ID: {}'.format(hit_id)
         mturk_connection = connection.MTurkConnection(
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
@@ -62,7 +65,8 @@ if __name__ == '__main__':
                 continue
             newest_asset = interactors.get_newest_asset(comparable_assets)
             older_assets = interactors.get_remaining_assets(comparable_assets)
-            interactors.upload_assignments_to_turk(newest_asset, older_assets)
+            interactors.upload_assignments_to_turk(
+                mturk_connection, newest_asset, older_assets)
             print
     finally:
         pgsql_connection.close()

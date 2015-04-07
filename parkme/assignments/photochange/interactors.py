@@ -75,8 +75,8 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
 
     cursor = db_connection.cursor()
     params = [
-        lot_id,
-        datetime.datetime.utcnow().year
+        lot_id
+        # datetime.datetime.utcnow().year
     ]
     query = '''
     SELECT pk_asset, pk_lot, str_bucket, str_path, dt_photo FROM asset
@@ -85,7 +85,6 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     pk_asset_category=2 AND
     pk_asset_status IN (1, 2) AND
     pk_lot=%s AND
-    extract(year from dt_photo) < %s
     ORDER BY asset.dt_photo DESC
     '''
     cursor.execute(query, params)
@@ -125,15 +124,18 @@ def get_comparable_assets(db_connection):
         yield list(get_comparable_assets_for_lot(db_connection, lot_id))
 
 
-def upload_assignments_to_turk(new_asset, older_assets):
+def upload_assignments_to_turk(mturk_connection, new_asset, older_assets):
     """Given the newest asset and a list of older assets this task will create an
     assignment to match the new asset with each of the older assets.
 
+    :param mturk_connection: A Mechanical Turk connection
+    :type mturk_connection: boto.mturk.connection.Connection
     :param new_asset: The newest asset
     :type new_asset: parkme.assignments.photochange.models.ComparableAsset
     :param older_assets: The older assets
     :type older_assets: list
     """
+    hit_template = models.PhotoChangeTemplate(mturk_connection)
     for index, old_asset in enumerate(older_assets):
         assignment_data = get_assignment_data(new_asset, old_asset)
         if not index:
@@ -158,6 +160,7 @@ def upload_all_tasks_to_turk(mturk_connection, db_connection):
 
         newest_asset = get_newest_asset(asset_group)
         remaining_assets = get_remaining_assets(asset_group)
-        upload_assignments_to_turk(newest_asset, remaining_assets)
+        upload_assignments_to_turk(
+            mturk_connection, newest_asset, remaining_assets)
         num_items_uploaded += len(remaining_assets)
     return num_items_uploaded
