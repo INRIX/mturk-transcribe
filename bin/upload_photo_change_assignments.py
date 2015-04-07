@@ -50,7 +50,14 @@ if __name__ == '__main__':
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
         lot_ids = [
-            get_lot_id(psql_connection, lot_id) for lot_id in LOT_IDS_FIXTURE]
-        print lot_ids
+            get_lot_id(pgsql_connection, lot_id) for lot_id in LOT_IDS_FIXTURE]
+        for lot_id in lot_ids:
+            print lot_id
+            comparable_assets = interactors.get_comparable_assets_for_lot(
+                pgsql_connection, lot_id)
+            newest_asset = interactors.get_newest_asset(comparable_assets)
+            older_assets = interactors.get_remaining_assets(comparable_assets)
+            interactors.upload_assignments_to_turk(newest_asset, older_assets)
+            print
     finally:
         pgsql_connection.close()
