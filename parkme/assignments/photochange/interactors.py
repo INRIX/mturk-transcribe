@@ -137,6 +137,7 @@ def get_comparable_assets(db_connection):
     :rtype: iterable
     """
     for (lot_id,) in get_all_lots(db_connection):
+        print lot_id
         yield list(get_comparable_assets_for_lot(db_connection, lot_id))
 
 
@@ -157,7 +158,10 @@ def upload_tasks_to_turk(mturk_connection, db_connection):
 
         newest_asset = get_newest_asset(asset_group)
         remaining_assets = get_remaining_assets(asset_group)
-        for old_asset in remaining_assets:
+        for index, old_asset in enumerate(remaining_assets):
             assignment_data = get_assignment_data(newest_asset, old_asset)
+            if not index:
+                print assignment_data['new_image_url']
+            print assignment_data['old_image_url']
             num_items_uploaded += 1
     return num_items_uploaded
