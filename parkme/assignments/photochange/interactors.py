@@ -84,7 +84,7 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     pk_lot_asset_type=4 AND
     pk_asset_category=2 AND
     pk_asset_status IN (1, 2) AND
-    pk_lot=%s AND
+    pk_lot=%s
     ORDER BY asset.dt_photo DESC
     '''
     cursor.execute(query, params)
