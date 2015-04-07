@@ -7,6 +7,9 @@
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved.
 """
 import collections
+import sys
+
+sys.path.append('')
 
 from boto.mturk import connection
 import psycopg2
