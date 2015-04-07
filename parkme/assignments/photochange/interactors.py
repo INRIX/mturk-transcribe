@@ -10,6 +10,7 @@ import datetime
 import functools
 
 from parkme import exceptions
+from parkme.assignments import utils
 from parkme.assignments.photochange import models
 
 
@@ -50,18 +51,6 @@ def get_remaining_assets(asset_group):
     return asset_group[1:]
 
 
-def asset_to_image_url(asset_bucket, asset_path):
-    """Convert the given asset information into a URL.
-
-    :param asset_bucket: The bucket containing the asset
-    :type asset_bucket: str or unicode
-    :param asset_path: The path containing the asset
-    :type asset_path: str or unicode
-    :rtype: str or unicode
-    """
-    return u'http://{}/{}'.format(asset_bucket, asset_path)
-
-
 def get_assignment_data(new_asset, old_asset):
     """Convert the given comparable assets into format for image comparison
     task.
@@ -72,9 +61,9 @@ def get_assignment_data(new_asset, old_asset):
     :type old_asset: models.ComparableAsset
     :rtype: dict
     """
-    new_image_url = asset_to_image_url(
+    new_image_url = utils.asset_to_image_url(
         new_asset.str_bucket, new_asset.str_path)
-    old_image_url = asset_to_image_url(
+    old_image_url = utils.asset_to_image_url(
         old_asset.str_bucket, old_asset.str_path)
     return {
         'new_image_url': new_image_url,
