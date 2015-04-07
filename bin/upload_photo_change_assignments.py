@@ -53,8 +53,8 @@ if __name__ == '__main__':
             get_lot_id(pgsql_connection, lot_id) for lot_id in LOT_IDS_FIXTURE]
         for lot_id in lot_ids:
             print lot_id
-            comparable_assets = interactors.get_comparable_assets_for_lot(
-                pgsql_connection, lot_id)
+            comparable_assets = list(interactors.get_comparable_assets_for_lot(
+                pgsql_connection, lot_id))
             newest_asset = interactors.get_newest_asset(comparable_assets)
             older_assets = interactors.get_remaining_assets(comparable_assets)
             interactors.upload_assignments_to_turk(newest_asset, older_assets)
