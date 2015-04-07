@@ -7,7 +7,7 @@
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
 import datetime
-import functools
+import itertools
 
 from parkme import exceptions
 from parkme.assignments import utils
@@ -105,7 +105,7 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     ORDER BY asset.dt_photo DESC
     '''
     cursor.execute(query, params)
-    return functools.imap(models.ComparableAsset, cursor)
+    return itertools.imap(models.ComparableAsset, cursor)
 
 
 def get_all_lots(db_connection):
