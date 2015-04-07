@@ -45,8 +45,11 @@ def get_lot_id(psql_connection, lot_id):
 
 if __name__ == '__main__':
     pgsql_connection = psycopg2.connect("dbname=pim user=pim")
-    mturk_connection = connection.MTurkConnection(
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-    lot_ids = [get_lot_id(lot_id) for lot_id in LOT_IDS_FIXTURE]
-    print lot_ids
+    try:
+        mturk_connection = connection.MTurkConnection(
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
+        lot_ids = [get_lot_id(lot_id) for lot_id in LOT_IDS_FIXTURE]
+        print lot_ids
+    finally:
+        pgsql_connection.close()
