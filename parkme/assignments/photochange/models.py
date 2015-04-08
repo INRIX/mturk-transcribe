@@ -80,18 +80,17 @@ class PhotoChangeAssignment(assignments.BaseAssignment):
     @property
     def same_sign(self):
         """Whether or not the images are of the same sign"""
-        return bool(
-            int(self.get_answer_to_question(self._SAME_SIGN_QUESTION_NAME)))
+        answer = self.get_answer_to_question(self._SAME_SIGN_QUESTION_NAME)
+        return bool(int(answer) if answer else False)
 
     @property
     def same_rates(self):
         """Whether or not these photos contain the same rates"""
-        return bool(
-            int(self.get_answer_to_question(self._SAME_RATES_QUESTION_NAME)))
+        answer = self.get_answer_to_question(self._SAME_RATES_QUESTION_NAME)
+        return bool(int(answer) if answer else False)
 
     @property
     def same_prices(self):
         """Whether or not these photos contain the same prices"""
-        return bool(
-            int(self.get_answer_to_question(self._SAME_PRICES_QUESTION_NAME)))
-
+        answer = self.get_answer_to_question(self._SAME_PRICES_QUESTION_NAME)
+        return bool(int(answer) if answer else False)
