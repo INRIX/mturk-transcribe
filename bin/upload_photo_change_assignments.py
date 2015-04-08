@@ -27,7 +27,7 @@ LOT_IDS_FIXTURE = [
     17171, 112761, 16416, 17637, 13752
 ]
 
-print get_total_cost_estimate(num_assignments, price_per_assignment):
+def get_total_cost_estimate(num_assignments, price_per_assignment):
     amazons_fee = 1.10
     return num_assignments * 3.0 * price_per_assignment * amazons_fee
 
