@@ -53,7 +53,7 @@ if __name__ == '__main__':
     batch_id = str(uuid.uuid4())
 
     try:
-        print 'HIT ID: {}'.format(hit_id)
+        print 'HIT ID: {}'.format(batch_id)
         mturk_connection = connection.MTurkConnection(
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
