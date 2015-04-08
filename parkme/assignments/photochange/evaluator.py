@@ -6,6 +6,7 @@
 
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
+from parkme.assignments import utils
 from parkme.assignments.photochange import models
 from parkme.turk import assignments
 
@@ -34,5 +35,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
     """
     all_assignments = get_all_photo_change_assignments(
         mturk_connection, batch_id)
-    for assignment in all_assignments:
-        pass
+    asset_id_to_assignments = utils.group_by_attribute(
+        all_assignments, 'new_asset_id')
+    for asset_id, all_assignments in asset_id_to_assignments.iteritems():
+        print asset_id, '->', len(all_assignments)
