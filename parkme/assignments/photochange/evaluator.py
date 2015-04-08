@@ -44,7 +44,8 @@ def get_consensus_result(list_of_assignments):
 
     results = []
     for each in list_of_assignments:
-        results.append([each.same_sign, each.same_rates, each.same_prices])
+        # NOTE(etscriver): Use tuples because they are hashable
+        results.append((each.same_sign, each.same_rates, each.same_prices))
 
     counted = collections.Counter(results)
     most_common = counted.most_common(1)
