@@ -30,6 +30,18 @@ def has_consensus(num_agree, total_num_items):
     return (float(num_agree) / float(total_num_items)) >= CONSENSUS_THRESHOLD
 
 
+def indicates_sign_has_changed(assignment):
+    """Does this assignment indicate that some aspect of the sign has changed?
+
+    :param assignment: An assignment
+    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
+    :rtype: bool
+    """
+    if not assignment.same_sign:
+        return False
+    return not assignment.same_rates or not assignment.same_prices
+
+
 def get_consensus_result(list_of_assignments):
     """Get the consensus result for a list of assignments if available.
 
@@ -43,8 +55,7 @@ def get_consensus_result(list_of_assignments):
 
     results = []
     for each in list_of_assignments:
-        # NOTE(etscriver): Use tuples because they are hashable
-        results.append((each.same_sign, each.same_rates, each.same_prices))
+        results.append(indicates_sign_has_changed(each))
 
     counted = collections.Counter(results)
     most_common = counted.most_common(1)
