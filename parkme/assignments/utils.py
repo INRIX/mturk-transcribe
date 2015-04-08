@@ -31,7 +31,7 @@ def group_by_attribute(iterable, attribute):
     :type attribute: str or unicode
     :rtype: collections.defaultdict
     """
-    results = collections.defaultdict({})
+    results = collections.defaultdict(list)
     for each in iterable:
         results[getattr(each, attribute)] = each
     return results
