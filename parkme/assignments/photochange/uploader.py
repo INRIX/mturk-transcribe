@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-    parkme.assignments.photochange.interactors
-    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Interactors containing functionality for photo change assignment.
+    parkme.assignments.photochange.uploader
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Interactors containing functionality to upload photo change assignments to
+    Mechanical Turk.
 
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
