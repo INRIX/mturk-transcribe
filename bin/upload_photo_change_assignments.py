@@ -50,7 +50,8 @@ def get_lot_id(psql_connection, lot_id):
 
 if __name__ == '__main__':
     pgsql_connection = psycopg2.connect("dbname=pim user=pim")
-    hit_id = str(uuid.uuid4())
+    batch_id = str(uuid.uuid4())
+
     try:
         print 'HIT ID: {}'.format(hit_id)
         mturk_connection = connection.MTurkConnection(
