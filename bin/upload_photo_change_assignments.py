@@ -27,6 +27,10 @@ LOT_IDS_FIXTURE = [
     17171, 112761, 16416, 17637, 13752
 ]
 
+print get_total_cost_estimate(num_assignments, price_per_assignment):
+    amazons_fee = 1.10
+    return num_assignments * 3.0 * price_per_assignment * amazons_fee
+
 
 def get_lot_id(psql_connection, lot_id):
     """Return the string id of the lot with the given integer id.
@@ -54,6 +58,7 @@ if __name__ == '__main__':
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
         lot_ids = [
             get_lot_id(pgsql_connection, lot_id) for lot_id in LOT_IDS_FIXTURE]
+        num_assignments = 0
         for lot_id in lot_ids:
             print lot_id
             comparable_assets = list(interactors.get_comparable_assets_for_lot(
@@ -67,6 +72,10 @@ if __name__ == '__main__':
             older_assets = interactors.get_remaining_assets(comparable_assets)
             interactors.upload_assignments_to_turk(
                 mturk_connection, batch_id, newest_asset, older_assets)
+            num_assignments += len(older_assets)
             print
+
+        print "Uploaded {} Assignments.".format(num_assignments)
+        print "Estimated Cost ${:0.02f}".format(get_total_cost_estimate(num_assignments, 0.02))
     finally:
         pgsql_connection.close()
