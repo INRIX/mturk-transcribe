@@ -74,10 +74,7 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
         raise exceptions.Error('Invalid lot_id given')
 
     cursor = db_connection.cursor()
-    params = [
-        lot_id
-        # datetime.datetime.utcnow().year
-    ]
+    params = [lot_id]
     query = '''
     SELECT pk_asset, pk_lot, str_bucket, str_path, dt_photo FROM asset
     LEFT JOIN asset_lot_asset_type_xref USING(pk_asset) WHERE
@@ -124,12 +121,15 @@ def get_comparable_assets(db_connection):
         yield list(get_comparable_assets_for_lot(db_connection, lot_id))
 
 
-def upload_assignments_to_turk(mturk_connection, new_asset, older_assets):
+def upload_assignments_to_turk(
+        mturk_connection, batch_id, new_asset, older_assets):
     """Given the newest asset and a list of older assets this task will create an
     assignment to match the new asset with each of the older assets.
 
     :param mturk_connection: A Mechanical Turk connection
     :type mturk_connection: boto.mturk.connection.Connection
+    :param batch_id: The ID to be associated wtih this batch of tasks
+    :type batch_id: str or unicode
     :param new_asset: The newest asset
     :type new_asset: parkme.assignments.photochange.models.ComparableAsset
     :param older_assets: The older assets
@@ -141,13 +141,16 @@ def upload_assignments_to_turk(mturk_connection, new_asset, older_assets):
         if not index:
             print assignment_data['new_image_url']
         print assignment_data['old_image_url']
+        hit_template.create_hit(assignment_data, batch_id)
 
 
-def upload_all_tasks_to_turk(mturk_connection, db_connection):
+def upload_all_tasks_to_turk(mturk_connection, batch_id, db_connection):
     """Upload all tasks to Mechanical Turk.
 
     :param mturk_connection: A Mechanical Turk connection
     :type mturk_connection: boto.mturk.Connection
+    :param batch_id: The ID to be associated wtih this batch of tasks
+    :type batch_id: str or unicode
     :param db_connection: A database connection
     :type db_connection: psycopg2.Connection
     :return: Number of items uploaded
@@ -161,6 +164,6 @@ def upload_all_tasks_to_turk(mturk_connection, db_connection):
         newest_asset = get_newest_asset(asset_group)
         remaining_assets = get_remaining_assets(asset_group)
         upload_assignments_to_turk(
-            mturk_connection, newest_asset, remaining_assets)
+            mturk_connection, batch_id, newest_asset, remaining_assets)
         num_items_uploaded += len(remaining_assets)
     return num_items_uploaded

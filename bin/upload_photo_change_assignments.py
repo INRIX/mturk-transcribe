@@ -66,7 +66,7 @@ if __name__ == '__main__':
             newest_asset = interactors.get_newest_asset(comparable_assets)
             older_assets = interactors.get_remaining_assets(comparable_assets)
             interactors.upload_assignments_to_turk(
-                mturk_connection, newest_asset, older_assets)
+                mturk_connection, batch_id, newest_asset, older_assets)
             print
     finally:
         pgsql_connection.close()
