@@ -17,18 +17,17 @@ from parkme.turk import assignments
 CONSENSUS_THRESHOLD = 0.51
 
 
-def has_consensus(num_agree, num_disagree):
+def has_consensus(num_agree, total_num_items):
     """Indicates whether or not the given numbers can be considered to have
     consensus.
 
     :param num_agree: The number of items that agree
     :type num_agree: int
-    :param num_disagree: The number of items that disagree
-    :type num_disagree: int
+    :param total_num_items: The total number of items
+    :type total_num_items: int
     :rtype: bool
     """
-    total_num_items = float(num_agree + num_disagree)
-    return (num_agree / total_num_items) >= CONSENSUS_THRESHOLD
+    return (float(num_agree) / float(total_num_items)) >= CONSENSUS_THRESHOLD
 
 
 def get_consensus_result(list_of_assignments):
