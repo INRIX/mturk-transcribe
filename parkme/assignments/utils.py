@@ -33,5 +33,5 @@ def group_by_attribute(iterable, attribute):
     """
     results = collections.defaultdict(list)
     for each in iterable:
-        results[getattr(each, attribute)] = each
+        results[getattr(each, attribute)].append(each)
     return results
