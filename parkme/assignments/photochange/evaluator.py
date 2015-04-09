@@ -66,18 +66,6 @@ def should_send_for_rate_pricing(assignment):
     return not needs_manual_update(assignment) and not assignment.same_prices
 
 
-def indicates_sign_has_changed(assignment):
-    """Does this assignment indicate that some aspect of the sign has changed?
-
-    :param assignment: An assignment
-    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
-    :rtype: bool
-    """
-    if not assignment.same_sign:
-        return False
-    return not assignment.same_rates or not assignment.same_prices
-
-
 def get_consensus_result(list_of_assignments):
     """Get the consensus result for a list of assignments if available.
 
@@ -91,7 +79,9 @@ def get_consensus_result(list_of_assignments):
 
     results = []
     for each in list_of_assignments:
-        results.append(indicates_sign_has_changed(each))
+        results.append((needs_manual_update(each),
+                        should_automatically_update(each),
+                        should_send_for_rate_pricing(each)))
 
     counted = collections.Counter(results)
     most_common = counted.most_common(1)
