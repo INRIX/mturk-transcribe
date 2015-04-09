@@ -12,8 +12,6 @@ import itertools
 from boto.mturk import layoutparam
 from boto.mturk import price
 
-from parkme import exceptions
-
 
 def in_batch(hit, batch_id):
     """Indicates whether or not the given HIT is in the batch with the given
@@ -87,8 +85,7 @@ class HITTemplate(object):
                  assignments_per_hit=1,
                  hit_expires_in=datetime.timedelta(days=7),
                  time_per_assignment=datetime.timedelta(hours=1),
-                 auto_approval_delay=datetime.timedelta(hours=8),
-                 annotation=None):
+                 auto_approval_delay=datetime.timedelta(hours=8)):
         """Initialize the HIT template with some basic information.
 
         :param mturk_connection: The mechanical turk connection to use
@@ -103,7 +100,8 @@ class HITTemplate(object):
         :type hit_expires_in: datetime.timedelta
         :param time_per_assignment: How much time Turkers have to complete
         :type time_per_assignment: datetime.timedelta
-        :param auto_approval_delay: The delay before assignment is auto-approved
+        :param auto_approval_delay: The delay before assignment is
+            auto-approved.
         :type auto_approval_delay: datetime.timedelta
         """
         self.mturk_connection = mturk_connection

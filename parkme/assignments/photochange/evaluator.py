@@ -35,7 +35,7 @@ def needs_manual_update(assignment):
     update.
 
     :param assignment: An assignment
-    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
+    :type assignment: photochanged.models.PhotoChangedAssignment
     :rtype: bool
     """
     return any([
@@ -49,7 +49,7 @@ def should_automatically_update(assignment):
     automatically updated.
 
     :param assignment: An assignment
-    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
+    :type assignment: photochanged.models.PhotoChangedAssignment
     :rtype: bool
     """
     return not needs_manual_update(assignment) and assignment.same_prices
@@ -60,7 +60,7 @@ def should_send_for_rate_pricing(assignment):
     for rate pricing.
 
     :param assignment: An assignment
-    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
+    :type assignment: photochanged.models.PhotoChangedAssignment
     :rtype: bool
     """
     return not needs_manual_update(assignment) and not assignment.same_prices

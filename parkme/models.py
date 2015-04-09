@@ -7,9 +7,7 @@
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved.
 """
 import collections
-import datetime
 import sqlite3
-import time
 
 import pytz
 
@@ -66,7 +64,9 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         """
         cursor = self.dbconn.cursor()
         cursor.execute(
-            "INSERT OR REPLACE INTO categorization_batch VALUES (?, ?, ?, ?, ?)",
+            """
+            INSERT OR REPLACE INTO categorization_batch VALUES (?, ?, ?, ?, ?)
+            """,
             (categorization_batch.categorization_batch_id,
              misc.datetime_to_microtime(
                  categorization_batch.newest_photo_timestamp),
@@ -83,7 +83,10 @@ class CategorizationBatchDataGateway(BaseDataGateway):
         """
         cursor = self.dbconn.cursor()
         cursor.execute(
-            "SELECT * FROM categorization_batch ORDER BY created_at DESC LIMIT 1")
+            """
+            SELECT * FROM categorization_batch
+            ORDER BY created_at DESC LIMIT 1
+            """)
         result = cursor.fetchone()
         if result:
             return self._raw_result_to_categorization_batch_obj(result)

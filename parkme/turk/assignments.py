@@ -14,22 +14,22 @@ from boto.mturk import connection
 from parkme.turk import hits
 
 
-def map_hits_to_assignments(hits, mturk_connection, assignment_cls):
+def map_hits_to_assignments(iter_hits, mturk_connection, assignment_cls):
     """Generator that converts the given HITs into Assignments.
 
-    :param hits: An iterable of HITs
-    :type hits: mturk.connection.HIT
+    :param iter_hits: An iterable of HITs
+    :type iter_hits: mturk.connection.HIT
     :param mturk_connection: The Mechanical Turk connection
     :type mturk_connection: mturk.connection.MTurkConnection
     :param assignment_cls: The assignment class
     :type assignment_cls: parkme.assignments.BaseAssignment
     :rtype: iterable of mturk.connection.Assignment
     """
-    hit_ids = itertools.imap(lambda x: x.HITId, hits)
+    hit_ids = itertools.imap(lambda x: x.HITId, iter_hits)
     assignments_for_hits = itertools.imap(
         mturk_connection.get_assignments, hit_ids)
     return itertools.imap(
-        lambda x: assignment_cls(x), itertools.chain(*assignments_for_hits))
+        assignment_cls, itertools.chain(*assignments_for_hits))
 
 
 def get_answer_to_question(assignment, question_id):
@@ -60,7 +60,7 @@ class BaseAssignment(object):
 
     def __init__(self, assignment):
         """Initialize assignment entity.
-        
+
         :param assignment: An assignment
         :type assignment: boto.mturk.Assignment
         """
@@ -183,12 +183,12 @@ class ImageCategorizationAssignment(BaseAssignment):
                 self._DOES_NOT_MATCH_QUESTION_NAME))
         return self._does_not_match
 
-    
+
 class RateTranscriptionAssignment(BaseAssignment):
     """Represents a rate transcription assignment
     TODO: Break this out into a file for application-specific models
     """
-    
+
     _RATES_QUESTION_NAME = 'Rates'
     _LOTID_QUESTION_NAME = 'LotId'
     _ASSET_ID_QUESTION_NAME = 'AssetId'
@@ -251,7 +251,7 @@ class RateTranscriptionAssignment(BaseAssignment):
             self._does_not_contain_rates = bool(self.get_answer_to_question(
                 self._NOT_RATES_QUESTION_NAME))
         return self._does_not_contain_rates
-    
+
 
 class AssignmentGateway(object):
     """Gateway using a MTurk connection to get at assignments."""
@@ -317,7 +317,10 @@ class AssignmentGateway(object):
         :type feedback: str or unicode or _DEFAULT
         """
         feedback = (
-            "We have reviewed and approved this hit. We apologize for any inconvenience."
+            """
+            We have reviewed and approved this hit.
+            We apologize for any inconvenience.
+            """
             if feedback is self._DEFAULT
             else feedback)
         try:

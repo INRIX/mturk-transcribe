@@ -12,7 +12,7 @@ from parkme.ratecard import parser
 
 class ParseFailedException(exceptions.Error):
     """Exception raised when parsing fails."""
-    
+
     def __init__(self, rates, *args, **kwargs):
         super(ParseFailedException, self).__init__(*args, **kwargs)
         self.rates = rates
@@ -56,7 +56,7 @@ class ParseResult(object):
             for each in rate_lines]
         notes = parser.get_user_visible_notes()
 
-        has_rejected_lines = any([line is False for _,line in rates])
+        has_rejected_lines = any([line is False for (_, line) in rates])
 
         if has_rejected_lines:
             raise ParseFailedException(rates)
@@ -66,7 +66,7 @@ class ParseResult(object):
     @property
     def parsed_rates(self):
         """Return just the parsed rate results from the rates.
-        
+
         :rtype: list or str or unicode
         """
         return [each[1] for each in self.rates if each[1].strip()]

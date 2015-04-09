@@ -7,7 +7,6 @@
 
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
-import datetime
 import itertools
 
 from parkme import exceptions
