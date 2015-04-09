@@ -106,6 +106,8 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
         all_assignments, 'new_asset_id')
     for asset_id, all_assignments in asset_id_to_assignments.iteritems():
         print asset_id, '->', len(all_assignments)
+        for each in all_assignments:
+            print each.same_sign, each.same_rates, each.same_prices
         if not has_consensus_for_assignments(all_assignments):
             print 'No consensus result.'
             print
