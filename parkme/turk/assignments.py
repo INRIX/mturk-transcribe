@@ -94,6 +94,18 @@ class BaseAssignment(object):
         answers = get_answer_to_question(self.assignment, question_name)
         return answers.fields[0] if answers and answers.fields else None
 
+    def get_bool_answer(self, question_name):
+        """Return the boolean answer to the given question. The answer is
+        assumed to be an integer (0=False, 1=True).
+
+        :param question_name: The question name
+        :type question_name: str or unicode
+        :return: Boolean answer or None if blank.
+        :rtype: bool or None
+        """
+        result = self.get_answer_to_question(question_name)
+        return bool(int(result)) if result else None
+
     def get_multichoice_answers_to_question(self, question_name):
         """Return a list containing all the answers to the question with the
         given name.

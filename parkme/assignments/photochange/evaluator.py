@@ -30,6 +30,42 @@ def has_consensus(num_agree, total_num_items):
     return (float(num_agree) / float(total_num_items)) >= CONSENSUS_THRESHOLD
 
 
+def needs_manual_update(assignment):
+    """Whether or not this assignment indicates the new photo needs a manual
+    update.
+
+    :param assignment: An assignment
+    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
+    :rtype: bool
+    """
+    return any([
+        not assignment.same_sign,
+        assignment.new_photo_has_extra_rates,
+        assignment.old_photo_has_extra_rates])
+
+
+def should_automatically_update(assignment):
+    """Whether or not this assignment indicates the new photo can be
+    automatically updated.
+
+    :param assignment: An assignment
+    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
+    :rtype: bool
+    """
+    return not needs_manual_update(assignment) and assignment.same_prices
+
+
+def should_send_for_rate_pricing(assignment):
+    """Whether or not this assignment indicates the new photo should be sent
+    for rate pricing.
+
+    :param assignment: An assignment
+    :type assignment: parkme.assignments.photochanged.models.PhotoChangedAssignment
+    :rtype: bool
+    """
+    return not needs_manual_update(assignment) and not assignment.same_prices
+
+
 def indicates_sign_has_changed(assignment):
     """Does this assignment indicate that some aspect of the sign has changed?
 

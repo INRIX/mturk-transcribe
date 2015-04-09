@@ -21,7 +21,7 @@ ComparableAsset = collections.namedtuple(
 class PhotoChangeTemplate(hits.HITTemplate):
     """MTurk assignment to check for photo changes"""
 
-    HIT_LAYOUT_ID = '3RUJD3ZWPZM9Y7YDA0H3FG9AT5ROF1'
+    HIT_LAYOUT_ID = ''
 
     def __init__(self, mturk_connection):
         """Initialize photo change HIT template"""
@@ -42,7 +42,8 @@ class PhotoChangeAssignment(assignments.BaseAssignment):
     _OLD_ASSET_ID_QUESTION_NAME = 'OldAssetId'
     _LOT_ID_QUESTION_NAME = 'LotId'
     _SAME_SIGN_QUESTION_NAME = 'SameSign'
-    _SAME_RATES_QUESTION_NAME = 'SameRates'
+    _NEW_PHOTO_HAS_EXTRA_RATES_QUESTION_NAME = 'NewPhotoHasExtraRates'
+    _OLD_PHOTO_HAS_EXTRA_RATES_QUESTION_NAME = 'OldPhotoHasExtraRates'
     _SAME_PRICES_QUESTION_NAME = 'SamePrices'
 
     def __init__(self, assignment):
@@ -80,17 +81,22 @@ class PhotoChangeAssignment(assignments.BaseAssignment):
     @property
     def same_sign(self):
         """Whether or not the images are of the same sign"""
-        answer = self.get_answer_to_question(self._SAME_SIGN_QUESTION_NAME)
-        return bool(int(answer)) if answer else None
+        return self.get_bool_answer(self._SAME_SIGN_QUESTION_NAME)
 
     @property
-    def same_rates(self):
-        """Whether or not these photos contain the same rates"""
-        answer = self.get_answer_to_question(self._SAME_RATES_QUESTION_NAME)
-        return bool(int(answer)) if answer else None
+    def new_photo_has_extra_rates(self):
+        """Whether or not the new photo has extra rates"""
+        return self.get_bool_answer(
+            self._NEW_PHOTO_HAS_EXTRA_RATES_QUESTION_NAME)
+
+    @property
+    def old_photo_has_extra_rates(self):
+        """Whether or not the old photo has extra rates"""
+        return self.get_bool_answer(
+            self._OLD_PHOTO_HAS_EXTRA_RATES_QUESTION_NAME)
 
     @property
     def same_prices(self):
-        """Whether or not these photos contain the same prices"""
-        answer = self.get_answer_to_question(self._SAME_PRICES_QUESTION_NAME)
-        return bool(int(answer)) if answer else None
+        """Whether or not the photos share the same prices"""
+        return self.get_bool_answer(
+            self._SAME_PRICES_QUESTION_NAME)
