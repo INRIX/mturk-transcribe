@@ -30,6 +30,54 @@ def has_consensus(num_agree, total_num_items):
     return (float(num_agree) / float(total_num_items)) >= CONSENSUS_THRESHOLD
 
 
+def get_consensus_result_among_items(items):
+    """Get the consensus result among a set of boolean items.
+
+    :param items: A list of items
+    :type items: list
+    :rtype: bool
+    """
+    true_items = [each for each in items if each]
+    return has_consensus(len(true_items), len(items))
+
+
+def get_consensus_result(list_of_assignments):
+    """Get the consensus result for a list of assignments if available.
+
+    :param list_of_assignments: A list of assignments
+    :type list_of_assignments: list
+    :return: List of answers to each question (list index is question number)
+    :rtype: list or None
+    """
+    if not list_of_assignments:
+        return None
+
+    same_sign = get_consensus_result_among_items(
+        [each.same_sign for each in list_of_assignments])
+    new_photo_has_extra_rates = get_consensus_result_among_items(
+        [each.new_photo_has_extra_rates for each in list_of_assignments])
+    old_photo_has_extra_rates = get_consensus_result_among_items(
+        [each.old_photo_has_extra_rates for each in list_of_assignments])
+    same_prices = get_consensus_result_among_items(
+        [each.same_prices for each in list_of_assignments])
+
+    return (same_sign,
+            new_photo_has_extra_rates,
+            old_photo_has_extra_rates,
+            same_prices)
+
+
+def has_consensus_for_assignments(list_of_assignments):
+    """Indicates whether or not there is consensus on a given result for a set
+    of assignments.
+
+    :param list_of_assignments: A list of assignments
+    :type list_of_assignments: list
+    :rtype: bool
+    """
+    return get_consensus_result(list_of_assignments) is not None
+
+
 def needs_manual_update(assignment):
     """Whether or not this assignment indicates the new photo needs a manual
     update.
@@ -64,66 +112,6 @@ def should_send_for_rate_pricing(assignment):
     :rtype: bool
     """
     return not needs_manual_update(assignment) and not assignment.same_prices
-
-
-def result_to_string(result):
-    """Convert the given result tuple into a string indicating the kind of
-    result.
-
-    :param result: A consensus result tuple
-    :type result: tuple
-    :rtype: str or unicode
-    """
-    if len(result) < 3:
-        raise RuntimeError('A consensus result tuple should have 3 values!')
-
-    if result[0]:
-        return "Manual Review"
-    if result[1]:
-        return "Auto-Update"
-    if result[2]:
-        return "Rate-Pricing"
-
-    return "UNKNOWN"
-
-
-def get_consensus_result(list_of_assignments):
-    """Get the consensus result for a list of assignments if available.
-
-    :param list_of_assignments: A list of assignments
-    :type list_of_assignments: list
-    :return: List of answers to each question (list index is question number)
-    :rtype: list or None
-    """
-    if not list_of_assignments:
-        return None
-
-    results = []
-    for each in list_of_assignments:
-        results.append((bool(each.same_sign),
-                        bool(each.new_photo_has_extra_rates),
-                        bool(each.old_photo_has_extra_rates),
-                        bool(each.same_prices)))
-
-    counted = collections.Counter(results)
-    most_common = counted.most_common(1)
-
-    most_common, num_agree_on_most_common = most_common[0]
-    if has_consensus(num_agree_on_most_common, len(list_of_assignments)):
-        return most_common
-
-    return None
-
-
-def has_consensus_for_assignments(list_of_assignments):
-    """Indicates whether or not there is consensus on a given result for a set
-    of assignments.
-
-    :param list_of_assignments: A list of assignments
-    :type list_of_assignments: list
-    :rtype: bool
-    """
-    return get_consensus_result(list_of_assignments) is not None
 
 
 def get_all_photo_change_assignments(mturk_connection, batch_id):
@@ -176,5 +164,5 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
 
             result = get_consensus_result(old_assns)
             print
-            print 'CONSENSUS RESULTS', result, result_to_string(result)
+            print 'CONSENSUS RESULTS', result
             print
