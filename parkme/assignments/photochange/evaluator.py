@@ -143,5 +143,6 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             print
             continue
         result = get_consensus_result(all_assignments)
-        print result
+        print
+        print 'CONSENSUS RESULTS', result
         print
