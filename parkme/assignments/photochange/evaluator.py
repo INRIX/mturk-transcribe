@@ -144,11 +144,11 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
                     each.new_photo_has_extra_rates,
                     each.old_photo_has_extra_rates,
                     each.same_prices)
-                if not has_consensus_for_assignments(old_assns):
-                    print 'No consensus result.'
-                    print
-                    continue
-                result = get_consensus_result(old_assns)
+            if not has_consensus_for_assignments(old_assns):
+                print 'No consensus result.'
                 print
-                print 'CONSENSUS RESULTS', result
-                print
+                continue
+            result = get_consensus_result(old_assns)
+            print
+            print 'CONSENSUS RESULTS', result
+            print
