@@ -66,6 +66,27 @@ def should_send_for_rate_pricing(assignment):
     return not needs_manual_update(assignment) and not assignment.same_prices
 
 
+def result_to_string(result):
+    """Convert the given result tuple into a string indicating the kind of
+    result.
+
+    :param result: A consensus result tuple
+    :type result: tuple
+    :rtype: str or unicode
+    """
+    if len(result) < 3:
+        raise RuntimeError('A consensus result tuple should have 3 values!')
+
+    if result[0]:
+        return "Manual Review"
+    if result[1]:
+        return "Auto-Update"
+    if result[2]:
+        return "Rate-Pricing"
+
+    return "UNKNOWN"
+
+
 def get_consensus_result(list_of_assignments):
     """Get the consensus result for a list of assignments if available.
 
@@ -150,5 +171,5 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
                 continue
             result = get_consensus_result(old_assns)
             print
-            print 'CONSENSUS RESULTS', result
+            print 'CONSENSUS RESULTS', result, result_to_string(result)
             print
