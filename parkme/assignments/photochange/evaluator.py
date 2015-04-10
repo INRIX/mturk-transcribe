@@ -158,7 +158,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             new_assns, 'old_asset_id')
 
         for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
-            print old_asset_id, new_asset_id, '->', len(new_assns)
+            print old_asset_id, new_asset_id, '->', len(old_assns)
             for each in old_assns:
                 print (
                     each.same_sign,
