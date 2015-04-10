@@ -156,6 +156,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
         # from those.
         old_asset_id_to_assignments = utils.group_by_attribute(
             new_assns, 'old_asset_id')
+        print '[{}]'.format(new_asset_id)
 
         for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
             print old_asset_id, new_asset_id, '->', len(old_assns)
