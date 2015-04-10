@@ -100,9 +100,10 @@ def get_consensus_result(list_of_assignments):
 
     results = []
     for each in list_of_assignments:
-        results.append((needs_manual_update(each),
-                        should_automatically_update(each),
-                        should_send_for_rate_pricing(each)))
+        results.append((bool(each.same_sign),
+                        bool(each.new_photo_has_extra_rates),
+                        bool(each.old_photo_has_extra_rates),
+                        bool(each.same_prices)))
 
     counted = collections.Counter(results)
     most_common = counted.most_common(1)
@@ -160,16 +161,19 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
 
         for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
             print old_asset_id, new_asset_id, '->', len(old_assns)
+
             for each in old_assns:
                 print (
                     each.same_sign,
                     each.new_photo_has_extra_rates,
                     each.old_photo_has_extra_rates,
                     each.same_prices)
+
             if not has_consensus_for_assignments(old_assns):
                 print 'No consensus result.'
                 print
                 continue
+
             result = get_consensus_result(old_assns)
             print
             print 'CONSENSUS RESULTS', result, result_to_string(result)
