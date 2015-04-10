@@ -41,6 +41,39 @@ def get_consensus_result_among_items(items):
     return has_consensus(len(true_items), len(items))
 
 
+def should_reject(assignment):
+    """Indicates whether or not the given assignment should be rejected.
+
+    :param assignment: An assignment
+    :type assignment: photochanged.models.PhotoChangedAssignment
+    :rtype: bool
+    """
+    all_blank = all([
+        assignment.same_sign is None,
+        assignment.new_photo_has_extra_rates is None,
+        assignment.old_photo_has_extra_rates is None,
+        assignment.same_prices is None])
+    questions_2_through_4_blank = all([
+        assignment.new_photo_has_extra_rates is None,
+        assignment.old_photo_has_extra_rates is None,
+        assignment.same_prices is None])
+    if all_blank:
+        return True
+    if not assignment.same_sign and not questions_2_through_4_blank:
+        return True
+    if (assignment.same_sign and
+            (assignment.new_photo_has_extra_rates or
+             assignment.old_photo_has_extra_rates) and
+            assignment.same_prices is not None):
+        return True
+    if (assignment.same_sign and
+            not assignment.new_photo_has_extra_rates and
+            not assignment.old_photo_has_extra_rates and
+            assignment.same_prices is None):
+        return True
+    return False
+
+
 def get_consensus_result(list_of_assignments):
     """Get the consensus result for a list of assignments if available.
 

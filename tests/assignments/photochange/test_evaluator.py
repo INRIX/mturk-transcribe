@@ -139,3 +139,66 @@ class ShouldSendForRatePricingTest(BaseAssignmentTestCase):
         self.mock_assignment.same_prices = False
         self.assertTrue(
             evaluator.should_send_for_rate_pricing(self.mock_assignment))
+
+
+class ShouldRejectTest(BaseAssignmentTestCase):
+
+    def setUp(self):
+        super(ShouldRejectTest, self).setUp()
+        self.mock_assignment.same_sign = None
+        self.mock_assignment.new_photo_has_extra_rates = None
+        self.mock_assignment.old_photo_has_extra_rates = None
+        self.mock_assignment.same_prices = None
+
+    def test_should_return_true_if_all_questions_blank(self):
+        """Should return True if all questions blank"""
+        self.assertTrue(evaluator.should_reject(self.mock_assignment))
+
+    def test_should_return_true_if_1_false_and_answer_other_question(self):
+        """Should return True if 1 is False and answered other questions"""
+        self.mock_assignment.same_sign = False
+        self.mock_assignment.new_photo_has_extra_rates = True
+        self.assertTrue(evaluator.should_reject(self.mock_assignment))
+
+    def test_should_return_true_if_1_and_2_true_and_4_not_none(self):
+        """Should return True if 1 and 2 True and all other questions not blank"""
+        self.mock_assignment.same_sign = True
+        self.mock_assignment.new_photo_has_extra_rates = True
+        self.mock_assignment.old_photo_has_extra_rates = False
+        self.mock_assignment.same_prices = True
+        self.assertTrue(evaluator.should_reject(self.mock_assignment))
+
+    def test_should_return_true_if_1_and_3_true_and_4_not_none(self):
+        """Should return True if 1 and 3 True and 4 not blank"""
+        self.mock_assignment.same_sign = True
+        self.mock_assignment.new_photo_has_extra_rates = False
+        self.mock_assignment.old_photo_has_extra_rates = True
+        self.mock_assignment.same_prices = True
+        self.assertTrue(evaluator.should_reject(self.mock_assignment))
+
+    def test_should_return_true_if_1_true_2_and_3_false_and_4_none(self):
+        """Should return True if 1 True, 2 & 3 False, and 4 None"""
+        self.mock_assignment.same_sign = True
+        self.mock_assignment.new_photo_has_extra_rates = False
+        self.mock_assignment.old_photo_has_extra_rates = False
+        self.mock_assignment.same_prices = None
+        self.assertTrue(evaluator.should_reject(self.mock_assignment))
+
+    def test_should_return_false_for_not_same_sign(self):
+        """Should return False for legitimate case"""
+        self.mock_assignment.same_sign = False
+        self.assertFalse(evaluator.should_reject(self.mock_assignment))
+
+    def test_should_return_false_for_changed_rates(self):
+        """Should return False for changed rates"""
+        self.mock_assignment.same_sign = True
+        self.mock_assignment.new_photo_has_extra_rates = True
+        self.assertFalse(evaluator.should_reject(self.mock_assignment))
+
+    def test_should_return_false_for_changed_prices(self):
+        """Should return False for changed prices"""
+        self.mock_assignment.same_sign = True
+        self.mock_assignment.new_photo_has_extra_rates = False
+        self.mock_assignment.old_photo_has_extra_rates = False
+        self.mock_assignment.same_prices = False
+        self.assertFalse(evaluator.should_reject(self.mock_assignment))
