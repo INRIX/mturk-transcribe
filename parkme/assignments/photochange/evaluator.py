@@ -128,21 +128,27 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
     """
     all_assignments = get_all_photo_change_assignments(
         mturk_connection, batch_id)
-    asset_id_to_assignments = utils.group_by_attribute(
+    new_asset_id_to_assignments = utils.group_by_attribute(
         all_assignments, 'new_asset_id')
-    for asset_id, all_assignments in asset_id_to_assignments.iteritems():
-        print asset_id, '->', len(all_assignments)
-        for each in all_assignments:
-            print (
-                each.same_sign,
-                each.new_photo_has_extra_rates,
-                each.old_photo_has_extra_rates,
-                each.same_prices)
-        if not has_consensus_for_assignments(all_assignments):
-            print 'No consensus result.'
-            print
-            continue
-        result = get_consensus_result(all_assignments)
-        print
-        print 'CONSENSUS RESULTS', result
-        print
+    for new_asset_id, new_assns in new_asset_id_to_assignments.iteritems():
+        # Each old asset will have 3 assignments. We want to get a consensus
+        # from those.
+        old_asset_id_to_assignments = utils.group_by_attribute(
+            new_assns, 'old_asset_id')
+
+        for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
+            print old_asset_id, new_asset_id, '->', len(new_assns)
+            for each in old_assns:
+                print (
+                    each.same_sign,
+                    each.new_photo_has_extra_rates,
+                    each.old_photo_has_extra_rates,
+                    each.same_prices)
+                if not has_consensus_for_assignments(old_assns):
+                    print 'No consensus result.'
+                    print
+                    continue
+                result = get_consensus_result(old_assns)
+                print
+                print 'CONSENSUS RESULTS', result
+                print
