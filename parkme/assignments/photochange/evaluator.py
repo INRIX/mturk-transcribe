@@ -74,6 +74,30 @@ def should_reject(assignment):
     return False
 
 
+def reject_assignment(assignment):
+    """Reject the given assignment with a nice explanatory message.
+
+    :param assignment: An assignment
+    :type assignment: photochanged.models.PhotoChangedAssignment
+    """
+    assignment_gateway = assignments.AssignmentGateway(mturk_connection)
+    assignment_gateway.reject(
+        assignment,
+        """
+        Our automated assignment processor has rejected this
+        assignment and is now sending you this message. The
+        assignment was rejected for failing to answer the
+        questions in the way indicated by the instructions.
+        Either too few or too many questions were answered.
+        This has rendered the results unusable. In addition
+        this indicates a failure to follow the included
+        instructions, which were designed to avoid such
+        problems. If you feel you have received this rejection
+        in error please message us and we will respond as soon
+        as we can.
+        """)
+
+
 def get_consensus_result(list_of_assignments):
     """Get the consensus result for a list of assignments if available.
 
@@ -173,40 +197,30 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
         mturk_connection, batch_id)
     new_asset_id_to_assignments = utils.group_by_attribute(
         all_assignments, 'new_asset_id')
+
     for new_asset_id, new_assns in new_asset_id_to_assignments.iteritems():
-        # Each old asset will have 3 assignments. We want to get a consensus
-        # from those.
         old_asset_id_to_assignments = utils.group_by_attribute(
             new_assns, 'old_asset_id')
-        print '[{}]'.format(new_asset_id)
 
-        same_sign_results = []
+        print
+        print '<{}>'.format(new_asset_id)
+        print
+
         for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
-            print old_asset_id, new_asset_id, '->', len(old_assns)
+            print
+            print '[{}]'.format(old_asset_id)
+            print
 
+            # First, reject anything that is just unusable
+            unrejected_assignments = []
             for each in old_assns:
-                print (
-                    each.same_sign,
-                    each.new_photo_has_extra_rates,
-                    each.old_photo_has_extra_rates,
-                    each.same_prices)
+                if should_reject(each):
+                    reject_assignment(each)
+                else:
+                    unrejected_assignments.append(each)
 
-            if not has_consensus_for_assignments(old_assns):
+            if len(unrejected_assignments) < 3:
                 print
-                print 'NO CONSENSUS.'
+                print 'TOO FEW VALID ASSIGNMENTS'
                 print
                 continue
-
-            result = get_consensus_result(old_assns)
-            print
-            print 'CONSENSUS RESULTS', result
-            print
-
-            if result[0]:
-                same_sign_results.append(result)
-
-        if same_sign_results:
-            print
-            print 'SAME SIGN RESULTS {}'.format(new_asset_id)
-            for each in same_sign_results:
-                print each
