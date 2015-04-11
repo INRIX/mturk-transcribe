@@ -135,6 +135,17 @@ def has_consensus_for_assignments(list_of_assignments):
     return get_consensus_result(list_of_assignments) is not None
 
 
+def is_same_sign(consensus_result):
+    """Indicates whether or not the given consensus result is of the same
+    sign.
+
+    :param consensus_result: A consensus result
+    :type consensus_result: list or tuple
+    :rtype: bool
+    """
+    return consensus_result[0] is True
+
+
 def needs_manual_update(assignment):
     """Whether or not this assignment indicates the new photo needs a manual
     update.
@@ -206,6 +217,8 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
         print '<{}>'.format(new_asset_id)
         print
 
+        results_with_same_photo = []
+
         for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
             print
             print '[{}]'.format(old_asset_id)
@@ -224,3 +237,17 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
                 print 'TOO FEW VALID ASSIGNMENTS'
                 print
                 continue
+
+            if not has_consensus_for_assignments(unrejected_assignments):
+                print
+                print 'NO CONSENSUS'
+                print
+                continue
+
+            consensus_result = get_consensus_result(unrejected_assignments)
+
+            # Not a photo of the same sign
+            if not is_same_sign(consensus_result):
+                continue
+
+            results_with_same_photo.append(consensus_result)
