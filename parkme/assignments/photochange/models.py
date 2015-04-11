@@ -21,7 +21,7 @@ ComparableAsset = collections.namedtuple(
 class PhotoChangeTemplate(hits.HITTemplate):
     """MTurk HIT to check for photo changes"""
 
-    HIT_LAYOUT_ID = '3539LEQ7OIAYVC0PO3154OJZ1OXLRC'
+    HIT_LAYOUT_ID = '303SAXLUKZHF5W0EIS76BOIK8F92H8'
 
     def __init__(self, mturk_connection):
         """Initialize photo change HIT template"""
