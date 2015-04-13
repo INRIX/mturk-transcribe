@@ -41,6 +41,21 @@ def get_consensus_result_among_items(items):
     return has_consensus(len(true_items), len(items))
 
 
+def get_answer_tuple(assignment):
+    """Return the answers to the given assignment as a tuple.
+
+    :param assignment: An assignment
+    :type assignment: photochanged.models.PhotoChangedAssignment
+    :rtype: tuple
+    """
+    return (
+        assignment.same_sign,
+        assignment.new_photo_has_extra_rates,
+        assignment.old_photo_has_extra_rates,
+        assignment.same_prices
+    )
+
+
 def should_reject(assignment):
     """Indicates whether or not the given assignment should be rejected.
 
