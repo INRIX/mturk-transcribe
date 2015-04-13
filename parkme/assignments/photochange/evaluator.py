@@ -74,9 +74,11 @@ def should_reject(assignment):
     return False
 
 
-def reject_assignment(assignment):
+def reject_assignment(mturk_connection, assignment):
     """Reject the given assignment with a nice explanatory message.
 
+    :param mturk_connection: A mechanical turk connection
+    :type mturk_connection: boto.mturk.connection.Connection
     :param assignment: An assignment
     :type assignment: photochanged.models.PhotoChangedAssignment
     """
@@ -217,7 +219,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
         print '<{}>'.format(new_asset_id)
         print
 
-        results_with_same_photo = []
+        results_with_same_sign = []
 
         for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
             print
@@ -228,7 +230,8 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             unrejected_assignments = []
             for each in old_assns:
                 if should_reject(each):
-                    reject_assignment(each)
+                    pass
+                    #reject_assignment(each)
                 else:
                     unrejected_assignments.append(each)
 
@@ -250,4 +253,4 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             if not is_same_sign(consensus_result):
                 continue
 
-            results_with_same_photo.append(consensus_result)
+            results_with_same_sign.append(consensus_result)
