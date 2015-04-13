@@ -251,6 +251,12 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
 
             # Not a photo of the same sign
             if not is_same_sign(consensus_result):
+                print
+                print 'DIFFERENT SIGN'
+                print
                 continue
 
+            print
+            print 'SAME SIGN'
+            print
             results_with_same_sign.append(consensus_result)
