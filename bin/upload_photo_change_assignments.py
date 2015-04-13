@@ -16,6 +16,7 @@ from boto.mturk import connection
 import psycopg2
 
 from parkme.assignments.photochange import interactors
+from parkme.assignments.photochange import models
 from parkme import settings
 
 
@@ -27,9 +28,13 @@ LOT_IDS_FIXTURE = [
     17171, 112761, 16416, 17637, 13752
 ]
 
-def get_total_cost_estimate(num_assignments, price_per_assignment):
+def get_total_cost_estimate(num_assignments):
     amazons_fee = 1.10
-    return num_assignments * 3.0 * price_per_assignment * amazons_fee
+    return (
+        num_assignments *
+        models.PhotoChangeTemplate.ASSIGNMENTS_PER_HIT *
+        models.PhotoChangeTemplate.PRICE_PER_ASSIGNMENT *
+        amazons_fee)
 
 
 def get_lot_id(psql_connection, lot_id):
@@ -77,6 +82,6 @@ if __name__ == '__main__':
             print
 
         print "Uploaded {} Assignments.".format(num_assignments)
-        print "Estimated Cost ${:0.02f}".format(get_total_cost_estimate(num_assignments, 0.02))
+        print "Estimated Cost ${:0.02f}".format(get_total_cost_estimate(num_assignments))
     finally:
         pgsql_connection.close()
