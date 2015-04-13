@@ -231,7 +231,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             for each in old_assns:
                 if should_reject(each):
                     print 'Reject {}'.format(each.assignment_id)
-                    #reject_assignment(each)
+                    reject_assignment(each)
                 else:
                     unrejected_assignments.append(each)
 
@@ -261,6 +261,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             print
             results_with_same_sign.append(consensus_result)
 
-        print 'SAME SIGN RESULTS'
-        for each in results_with_same_sign:
-            print each
+        if results_with_same_sign:
+            print 'SAME SIGN RESULTS'
+            for each in results_with_same_sign:
+                print each
