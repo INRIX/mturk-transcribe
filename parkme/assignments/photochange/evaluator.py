@@ -230,7 +230,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             unrejected_assignments = []
             for each in old_assns:
                 if should_reject(each):
-                    pass
+                    print 'Reject {}'.format(each.assignment_id)
                     #reject_assignment(each)
                 else:
                     unrejected_assignments.append(each)
