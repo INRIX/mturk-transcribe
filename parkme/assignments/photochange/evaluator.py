@@ -260,3 +260,7 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             print 'SAME SIGN'
             print
             results_with_same_sign.append(consensus_result)
+
+        print 'SAME SIGN RESULTS'
+        for each in results_with_same_sign:
+            print each
