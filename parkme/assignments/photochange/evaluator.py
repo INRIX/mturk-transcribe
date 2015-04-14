@@ -248,12 +248,10 @@ def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
             for each in old_assns:
                 if should_reject(each):
                     print 'Reject {}'.format(each.assignment_id)
-                    assignment_gateway.accept_rejected(
-                        each,
-                        feedback='All rejections on this assignment have been reversed.')
                     #reject_assignment(mturk_connection, each)
                 else:
-                    assignment_gateway.accept(each, feedback='Assignment accepted. Thank you!')
+                    assignment_gateway.accept(
+                        each, feedback='Assignment accepted. Thank you!')
                     unrejected_assignments.append(each)
 
             if len(unrejected_assignments) < 3:
