@@ -85,7 +85,10 @@ class HITTemplate(object):
                  assignments_per_hit=1,
                  hit_expires_in=datetime.timedelta(days=7),
                  time_per_assignment=datetime.timedelta(hours=1),
-                 auto_approval_delay=datetime.timedelta(hours=8)):
+                 auto_approval_delay=datetime.timedelta(hours=8),
+                 title=None,
+                 description=None,
+                 keywords=None):
         """Initialize the HIT template with some basic information.
 
         :param mturk_connection: The mechanical turk connection to use
@@ -103,6 +106,12 @@ class HITTemplate(object):
         :param auto_approval_delay: The delay before assignment is
             auto-approved.
         :type auto_approval_delay: datetime.timedelta
+        :param title: The title
+        :type title: str or unicode or None
+        :param description: The description
+        :type description: str or unicode or None
+        :param keywords: List of keywords
+        :type keywords: list
         """
         self.mturk_connection = mturk_connection
         self.hit_layout_id = hit_layout_id
@@ -111,6 +120,9 @@ class HITTemplate(object):
         self.hit_expires_in = hit_expires_in
         self.time_per_assignment = time_per_assignment
         self.auto_approval_delay = auto_approval_delay
+        self.title = title
+        self.description = description
+        self.keywords = ','.join(keywords) if keywords else None
 
     def create_hit(self, params, batch_id=None):
         """Create a new HIT using this template with the given params.
@@ -132,4 +144,7 @@ class HITTemplate(object):
             duration=self.time_per_assignment,
             approval_delay=self.auto_approval_delay,
             annotation=batch_id,
-            layout_params=boto_params)
+            layout_params=boto_params,
+            title=self.title,
+            description=self.description,
+            keywords=self.keywords)

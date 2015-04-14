@@ -29,6 +29,8 @@ class PhotoChangeTemplate(hits.HITTemplate):
         """Initialize photo change HIT template"""
         super(PhotoChangeTemplate, self).__init__(
             mturk_connection=mturk_connection,
+            title='New Photo vs Old Photo',
+            description='You will be shown 2 photos and asked various questions about them.',
             hit_layout_id=self.HIT_LAYOUT_ID,
             reward_per_assignment=self.PRICE_PER_ASSIGNMENT_DOLLARS,
             assignments_per_hit=self.ASSIGNMENTS_PER_HIT,
