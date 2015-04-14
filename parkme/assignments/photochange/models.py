@@ -21,7 +21,7 @@ ComparableAsset = collections.namedtuple(
 class PhotoChangeTemplate(hits.HITTemplate):
     """MTurk HIT to check for photo changes"""
 
-    HIT_LAYOUT_ID = '3VOPQGSVSICWSGC5BR4ZYT0359VXFE'
+    HIT_LAYOUT_ID = '3EHVJHX8XFKTFEQ1OKEQO6OVSC703F'
     PRICE_PER_ASSIGNMENT_DOLLARS = 0.05
     ASSIGNMENTS_PER_HIT = 3
 
