@@ -33,7 +33,7 @@ def get_total_cost_estimate(num_assignments):
     return (
         num_assignments *
         models.PhotoChangeTemplate.ASSIGNMENTS_PER_HIT *
-        models.PhotoChangeTemplate.PRICE_PER_ASSIGNMENT *
+        models.PhotoChangeTemplate.PRICE_PER_ASSIGNMENT_DOLLARS *
         amazons_fee)
 
 
