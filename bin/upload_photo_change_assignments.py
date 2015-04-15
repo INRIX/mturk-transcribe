@@ -16,7 +16,7 @@ sys.path.append('')
 from boto.mturk import connection
 import psycopg2
 
-from parkme.assignments.photochange import interactors
+from parkme.assignments.photochange import uploader
 from parkme.assignments.photochange import models
 from parkme import settings
 
