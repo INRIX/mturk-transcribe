@@ -22,7 +22,7 @@ class PhotoChangeTemplate(hits.HITTemplate):
     """MTurk HIT to check for photo changes"""
 
     HIT_LAYOUT_ID = '3KSK2GNGRZO4QEWXMSLBUYNCET8H3X'
-    PRICE_PER_ASSIGNMENT_DOLLARS = 0.10
+    PRICE_PER_ASSIGNMENT_DOLLARS = 0.05
     ASSIGNMENTS_PER_HIT = 3
 
     def __init__(self, mturk_connection):
