@@ -7,6 +7,7 @@
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved.
 """
 import collections
+import csv
 import sys
 import uuid
 
@@ -53,17 +54,37 @@ def get_lot_id(psql_connection, lot_id):
     return results[0][0] if results else None
 
 
+def get_lot_ids_from_csv_file(csv_file_path):
+    """Get lot ids from the given CSV file.
+
+    :param csv_file_path: The path to the file
+    :type csv_file_path: str or unicode
+    :rtype: list
+    """
+    lot_ids = []
+    with open(csv_file_path, 'r') as csvfile:
+        csvreader = csv.DictReader(csvfile)
+        for row in csvreader:
+            lot_ids.append(row['pk_lot'])
+    return lot_ids
+
+
 if __name__ == '__main__':
     pgsql_connection = psycopg2.connect("dbname=pim user=pim")
     batch_id = str(uuid.uuid4())
+    lot_ids = []
 
     try:
+        if len(sys.argv) == 2:
+            lot_ids = get_lot_ids_from_file(sys.argv[1])
+        else:
+            lot_ids = [
+                get_lot_id(psql_connection, each) for each in LOT_IDS_FIXTURE]
+
         print 'HIT ID: {}'.format(batch_id)
         mturk_connection = connection.MTurkConnection(
             aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
             aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY)
-        lot_ids = [
-            get_lot_id(pgsql_connection, lot_id) for lot_id in LOT_IDS_FIXTURE]
         num_assignments = 0
         for lot_id in lot_ids:
             print lot_id
