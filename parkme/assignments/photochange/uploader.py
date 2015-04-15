@@ -82,8 +82,8 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     pk_asset_category=2 AND
     pk_asset_status IN (2, 4, 5) AND
     pk_lot=%s AND
-    extract(year from dt_create_date) >= %s AND
-    extract(month from dt_create_date) >= %s
+    extract(year from asset.dt_create_date) >= %s AND
+    extract(month from asset.dt_create_date) >= %s
     ORDER BY asset.dt_photo DESC
     '''
     cursor.execute(query, params)
