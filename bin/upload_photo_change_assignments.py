@@ -79,7 +79,7 @@ if __name__ == '__main__':
             lot_ids = get_lot_ids_from_csv_file(sys.argv[1])
         else:
             lot_ids = [
-                get_lot_id(psql_connection, each) for each in LOT_IDS_FIXTURE]
+                get_lot_id(pgsql_connection, each) for each in LOT_IDS_FIXTURE]
 
         print 'HIT ID: {}'.format(batch_id)
         mturk_connection = connection.MTurkConnection(
@@ -97,8 +97,8 @@ if __name__ == '__main__':
                 continue
             newest_asset = uploader.get_newest_asset(comparable_assets)
             older_assets = uploader.get_remaining_assets(comparable_assets)
-            uploader.upload_assignments_to_turk(
-                mturk_connection, batch_id, newest_asset, older_assets)
+            #uploader.upload_assignments_to_turk(
+            #    mturk_connection, batch_id, newest_asset, older_assets)
             num_assignments += len(older_assets)
             print
 

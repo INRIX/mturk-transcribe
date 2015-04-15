@@ -80,7 +80,7 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     LEFT JOIN asset_lot_asset_type_xref USING(pk_asset) WHERE
     pk_lot_asset_type=4 AND
     pk_asset_category=2 AND
-    pk_asset_status IN (2, 4, 5)
+    pk_asset_status IN (2, 4, 5) AND
     pk_lot=%s AND
     extract(year from dt_create_date) >= %s AND
     extract(month from dt_create_date) >= %s
