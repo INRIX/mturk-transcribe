@@ -82,7 +82,6 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     SELECT pk_asset, pk_lot, str_bucket, str_path, dt_photo FROM asset
     LEFT JOIN asset_lot_asset_type_xref USING(pk_asset) WHERE
     pk_lot_asset_type=4 AND
-    pk_asset_category=2 AND
     pk_asset_status IN (2, 4, 5) AND
     pk_lot=%s AND
     asset.dt_create_date >= %s
