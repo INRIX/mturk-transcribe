@@ -7,7 +7,10 @@
 
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
+import datetime
 import itertools
+
+import pytz
 
 from parkme import exceptions
 from parkme.assignments import utils
@@ -74,7 +77,7 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
         raise exceptions.Error('Invalid lot_id given')
 
     cursor = db_connection.cursor()
-    params = [lot_id, 2013, 11]
+    params = [lot_id, datetime.datetime(2013, 11, 01, tzinfo=pytz.utc)]
     query = '''
     SELECT pk_asset, pk_lot, str_bucket, str_path, dt_photo FROM asset
     LEFT JOIN asset_lot_asset_type_xref USING(pk_asset) WHERE
@@ -82,8 +85,7 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
     pk_asset_category=2 AND
     pk_asset_status IN (2, 4, 5) AND
     pk_lot=%s AND
-    extract(year from asset.dt_create_date) >= %s AND
-    extract(month from asset.dt_create_date) >= %s
+    asset.dt_create_date >= %s
     ORDER BY asset.dt_photo DESC
     '''
     cursor.execute(query, params)
