@@ -88,16 +88,16 @@ if __name__ == '__main__':
         num_assignments = 0
         for lot_id in lot_ids:
             print lot_id
-            comparable_assets = list(interactors.get_comparable_assets_for_lot(
+            comparable_assets = list(uploader.get_comparable_assets_for_lot(
                 pgsql_connection, lot_id))
 
-            if not interactors.has_enough_assets_to_compare(comparable_assets):
+            if not uploader.has_enough_assets_to_compare(comparable_assets):
                 print 'Not enough assets.'
                 print
                 continue
-            newest_asset = interactors.get_newest_asset(comparable_assets)
-            older_assets = interactors.get_remaining_assets(comparable_assets)
-            interactors.upload_assignments_to_turk(
+            newest_asset = uploader.get_newest_asset(comparable_assets)
+            older_assets = uploader.get_remaining_assets(comparable_assets)
+            uploader.upload_assignments_to_turk(
                 mturk_connection, batch_id, newest_asset, older_assets)
             num_assignments += len(older_assets)
             print
