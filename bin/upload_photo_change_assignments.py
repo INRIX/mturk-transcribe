@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
     try:
         if len(sys.argv) == 2:
-            lot_ids = get_lot_ids_from_file(sys.argv[1])
+            lot_ids = get_lot_ids_from_csv_file(sys.argv[1])
         else:
             lot_ids = [
                 get_lot_id(psql_connection, each) for each in LOT_IDS_FIXTURE]
