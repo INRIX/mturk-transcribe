@@ -74,14 +74,16 @@ def get_comparable_assets_for_lot(db_connection, lot_id):
         raise exceptions.Error('Invalid lot_id given')
 
     cursor = db_connection.cursor()
-    params = [lot_id]
+    params = [lot_id, 2013, 11]
     query = '''
     SELECT pk_asset, pk_lot, str_bucket, str_path, dt_photo FROM asset
     LEFT JOIN asset_lot_asset_type_xref USING(pk_asset) WHERE
     pk_lot_asset_type=4 AND
     pk_asset_category=2 AND
-    pk_asset_status IN (1, 2) AND
-    pk_lot=%s
+    pk_asset_status IN (2, 4, 5)
+    pk_lot=%s AND
+    extract(year from dt_create_date) >= %s AND
+    extract(month from dt_create_date) >= %s
     ORDER BY asset.dt_photo DESC
     '''
     cursor.execute(query, params)
