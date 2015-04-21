@@ -27,7 +27,7 @@ def get_asset_info(asset_id):
     :return: The asset bucket and path
     :rtype: tuple of (asset_bucket, asset_path)
     """
-    with db.cursor() as curr:
+    with db.cursor() as curr, _:
         results = curr.execute(
             'SELECT str_bucket, str_path FROM asset WHERE pk_asset=%s',
             [asset_id])

@@ -17,7 +17,7 @@ def cursor(connection_params=None):
 
     :param connection_params: Any psycopg2 connection params
     :type connection_params: str or unicode
-    :rtype: psycopg2.Connection
+    :rtype: tuple of (psycopg2.Cursor, psycopg2.Connection)
     """
     connection_params = (
         connection_params if connection_params else "dbname=pim user=pim")
