@@ -9,6 +9,7 @@
 import collections
 import csv
 
+from parkme import db
 from parkme.assignments import utils
 from parkme.assignments.photochange import models
 from parkme.turk import assignments
@@ -16,6 +17,32 @@ from parkme.turk import assignments
 
 # The minimum percentage of matches to consider the results a consensus
 CONSENSUS_THRESHOLD = 0.51
+
+
+def get_asset_info(asset_id):
+    """Return the information for the given asset.
+
+    :param asset_id: An asset id
+    :type asset_id: str or unicode
+    :return: The asset bucket and path
+    :rtype: tuple of (asset_bucket, asset_path)
+    """
+    with db.cursor() as curr:
+        results = curr.execute(
+            'SELECT str_bucket, str_path FROM asset WHERE pk_asset=%s',
+            [asset_id])
+        return results.fetchone()
+
+
+def get_photo_url_for_asset(asset_id):
+    """Connect to the database and return the asset URL for the given asset.
+
+    :param asset_id: An asset id
+    :type asset_id: str or unicode
+    :rtype: str or unicode
+    """
+    bucket, path = get_asset_info(asset_id)
+    return utils.asset_to_image_url(bucket, path)
 
 
 def has_consensus(num_agree, total_num_items):
@@ -231,7 +258,8 @@ def dump_results(output_file, mturk_connection, batch_id):
 
     headers = [
         'new_asset_id', 'old_asset_id', 'worker_id', 'same_sign',
-        'new_photo_has_extra_rates', 'old_photo_has_extra_rates', 'same_prices'
+        'new_photo_has_extra_rates', 'old_photo_has_extra_rates',
+        'same_prices', 'new_asset_url', 'old_asset_url'
     ]
 
     assignment_results = []
@@ -242,6 +270,8 @@ def dump_results(output_file, mturk_connection, batch_id):
 
         for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
             for each in old_assns:
+                new_asset_url = get_photo_url_for_asset(new_asset_id)
+                old_asset_url = get_photo_url_for_asset(old_asset_id)
                 assignment_results.append([
                     new_asset_id,
                     old_asset_id,
@@ -249,7 +279,9 @@ def dump_results(output_file, mturk_connection, batch_id):
                     each.same_sign,
                     each.new_photo_has_extra_rates,
                     each.old_photo_has_extra_rates,
-                    each.same_prices
+                    each.same_prices,
+                    new_asset_url,
+                    old_asset_url
                 ])
 
     with open(output_file, 'w') as outfile:
