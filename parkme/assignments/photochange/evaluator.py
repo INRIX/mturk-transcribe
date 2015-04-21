@@ -7,6 +7,7 @@
     Copyright (C) 2015 ParkMe Inc. All Rights Reserved
 """
 import collections
+import csv
 
 from parkme.assignments import utils
 from parkme.assignments.photochange import models
@@ -211,6 +212,51 @@ def get_all_photo_change_assignments(mturk_connection, batch_id):
     assignment_gateway = assignments.AssignmentGateway(mturk_connection)
     return assignment_gateway.get_by_batch_id(
         batch_id, models.PhotoChangeAssignment)
+
+
+def dump_results(output_file, mturk_connection, batch_id):
+    """Dump the given batch results into a CSV file.
+
+    :param output_file: The output file path
+    :type output_file: str or unicode
+    :param mturk_connection: A mechanical turk connection
+    :type mturk_connection: boto.mturk.connection.Connection
+    :param batch_id: A batch id
+    :type batch_id: str or unicode
+    """
+    all_assignments = get_all_photo_change_assignments(
+        mturk_connection, batch_id)
+    new_asset_id_to_assignments = utils.group_by_attribute(
+        all_assignments, 'new_asset_id')
+
+    headers = [
+        'new_asset_id', 'old_asset_id', 'worker_id', 'same_sign',
+        'new_photo_has_extra_rates', 'old_photo_has_extra_rates', 'same_prices'
+    ]
+
+    assignment_results = []
+
+    for new_asset_id, new_assns in new_asset_id_to_assignments.iteritems():
+        old_asset_id_to_assignments = utils.group_by_attribute(
+            new_assns, 'old_asset_id')
+
+        for old_asset_id, old_assns in old_asset_id_to_assignments.iteritems():
+            for each in old_assns:
+                assignment_results.append([
+                    new_asset_id,
+                    old_asset_id,
+                    each.worker_id,
+                    each.same_sign,
+                    each.new_photo_has_extra_rates,
+                    each.old_photo_has_extra_rates,
+                    each.same_prices
+                ])
+
+    with open(output_file, 'w') as outfile:
+        csvwriter = csv.writer(outfile)
+        csvwriter.writerow(headers)
+        for each in assignment_results:
+            csvwriter.writerow(each)
 
 
 def evaluate_all_photo_change_assignments(mturk_connection, batch_id):
